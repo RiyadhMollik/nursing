@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>১০৫ দিনে নার্স স্বপ্ন পূরণের চ্যালেঞ্জ</title>
+<meta name="description" content="১০৫ দিনের Nursing Admission Challenge — প্রতিদিনের ক্লাস, পরীক্ষা, প্রশ্ন ব্যাংক ও বই এক জায়গায়।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+ --navy:#102a43; --blue:#1769e0; --teal:#0aa79d; --green:#16a66a;
+ --bg:#f5f8fc; --card:#fff; --text:#102033; --muted:#6b7b8f;
+ --line:#e4eaf2; --orange:#ff8a32; --shadow:0 18px 50px rgba(25,55,90,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Sans Bengali",system-ui,sans-serif}
+a{text-decoration:none;color:inherit}
+button,input,select{font:inherit}
+.container{width:min(1160px,calc(100% - 32px));margin:auto}
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.90);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav-inner{height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{font-weight:900;font-size:20px;color:var(--navy);display:flex;align-items:center;gap:10px}
+.brand-badge{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--teal));color:#fff;display:grid;place-items:center;font-weight:900}
+.navlinks{display:flex;gap:22px;color:#526477;font-size:14px}
+.navlinks a:hover{color:var(--blue)}
+.btn{border:0;border-radius:14px;padding:13px 20px;font-weight:800;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:linear-gradient(135deg,var(--blue),#4c8df0);color:#fff;box-shadow:0 10px 24px rgba(23,105,224,.22)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(23,105,224,.28)}
+.btn-soft{background:#edf5ff;color:var(--blue)}
+.hero{padding:72px 0 44px;position:relative;overflow:hidden;background:radial-gradient(circle at 80% 20%,#dff8f5 0,transparent 35%),linear-gradient(180deg,#fff 0,#f5f9ff 100%)}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:50px}
+.kicker{display:inline-flex;align-items:center;gap:8px;background:#eaf7f5;color:#087e77;border:1px solid #cceee9;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:800}
+h1{font-size:clamp(40px,5vw,68px);line-height:1.13;margin:18px 0 16px;color:var(--navy);letter-spacing:-1.8px}
+.hero p{font-size:18px;line-height:1.9;color:var(--muted);max-width:650px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.hero-card{background:rgba(255,255,255,.86);border:1px solid rgba(218,229,242,.95);box-shadow:var(--shadow);border-radius:28px;padding:25px}
+.ring{width:190px;height:190px;border-radius:50%;margin:0 auto 20px;background:conic-gradient(var(--blue) 0 23%,#e9eff6 23% 100%);display:grid;place-items:center;position:relative}
+.ring:after{content:"";position:absolute;inset:13px;border-radius:50%;background:#fff}
+.ring-content{position:relative;z-index:1;text-align:center}
+.ring-content strong{display:block;font-size:40px;color:var(--navy)}
+.ring-content span{font-size:13px;color:var(--muted)}
+.mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mini{padding:14px;border:1px solid var(--line);border-radius:16px;text-align:center;background:#fff}
+.mini b{display:block;font-size:21px;color:var(--navy)}
+.mini span{font-size:11px;color:var(--muted)}
+.section{padding:72px 0}
+.section-head{text-align:center;max-width:720px;margin:0 auto 35px}
+.section-head h2{font-size:34px;color:var(--navy);margin:0 0 10px}
+.section-head p{color:var(--muted);line-height:1.8;margin:0}
+.cards4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stage{background:#fff;border:1px solid var(--line);border-radius:22px;padding:23px;box-shadow:0 8px 25px rgba(25,55,90,.05)}
+.stage .icon{width:46px;height:46px;border-radius:14px;background:#edf5ff;color:var(--blue);display:grid;place-items:center;font-size:22px}
+.stage h3{margin:15px 0 4px;font-size:18px}.stage p{color:var(--muted);font-size:13px;margin:0;line-height:1.7}
+.stage .days{margin-top:15px;font-weight:900;color:var(--blue)}
+.dashboard{background:#0e2640;color:#fff;border-radius:32px;padding:32px;box-shadow:0 25px 60px rgba(10,34,60,.20)}
+.dash-top{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.dash-title small{color:#a9bfd4}.dash-title h2{margin:3px 0 0;font-size:30px}
+.progress{height:12px;background:#24415d;border-radius:999px;overflow:hidden;margin:25px 0 18px}
+.progress span{display:block;height:100%;background:linear-gradient(90deg,#25c7bd,#4b91ff);border-radius:inherit}
+.dash-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.dmetric{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:15px}
+.dmetric b{display:block;font-size:23px}.dmetric span{font-size:12px;color:#b8c9d9}
+.today{display:grid;grid-template-columns:1fr 1.15fr;gap:20px;align-items:stretch}
+.today-main,.today-side{background:#fff;border:1px solid var(--line);border-radius:25px;padding:26px;box-shadow:0 10px 30px rgba(25,55,90,.05)}
+.day-pill{display:inline-flex;background:#eaf7f5;color:#087e77;padding:7px 11px;border-radius:999px;font-weight:900;font-size:13px}
+.today-main h3{font-size:30px;margin:13px 0 5px;color:var(--navy)}
+.topic{font-size:20px;font-weight:800;line-height:1.6}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+.tag{padding:7px 10px;background:#f3f6fa;border-radius:10px;font-size:12px;color:#516274}
+.actions4{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.action{border:1px solid var(--line);border-radius:18px;padding:17px;text-align:left;background:#fff;cursor:pointer;transition:.2s}
+.action:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(25,55,90,.08);border-color:#cbdcf5}
+.action b{display:block;color:var(--navy);margin:7px 0 2px}.action span{font-size:12px;color:var(--muted)}
+.action .emoji{font-size:24px}
+.roadmap{overflow-x:auto;padding:8px 2px 18px}
+.roadline{display:flex;min-width:1150px;align-items:center}
+.node-wrap{display:flex;align-items:center}
+.node{width:46px;height:46px;border-radius:50%;background:#fff;border:2px solid #dce5ef;display:grid;place-items:center;font-size:11px;font-weight:900;color:#6b7b8f;position:relative;z-index:2}
+.node.done{background:#e9f8f1;border-color:#87d9b5;color:#087c50}
+.node.current{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 0 7px rgba(23,105,224,.10)}
+.connector{width:25px;height:3px;background:#dce5ef}.connector.done{background:#8bd7b6}
+.table-card{background:#fff;border:1px solid var(--line);border-radius:25px;overflow:hidden;box-shadow:0 10px 30px rgba(25,55,90,.05)}
+.filters{padding:20px;display:flex;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.select{border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px 14px;color:#425468;min-width:190px;outline:none}
+.table-scroll{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:850px}
+th,td{padding:15px 16px;border-bottom:1px solid #edf1f5;text-align:left;vertical-align:top}
+th{font-size:12px;color:#6b7b8f;background:#fafbfd;position:sticky;top:0;z-index:1}
+td{font-size:13px}.day-cell{font-weight:900;color:var(--blue)}
+tr.current-row{background:#f0f7ff;box-shadow:inset 4px 0 0 var(--blue)}
+.row-btn{border:0;background:#edf5ff;color:var(--blue);padding:7px 10px;border-radius:9px;font-size:11px;font-weight:800;cursor:pointer}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.step{background:#fff;border:1px solid var(--line);border-radius:22px;padding:23px}
+.step-num{font-size:12px;font-weight:900;color:var(--blue)}
+.step h3{margin:9px 0 5px}.step p{color:var(--muted);font-size:13px;line-height:1.7;margin:0}
+.cta{padding:70px 0}.cta-box{background:linear-gradient(135deg,#0e2a47,#1769e0);border-radius:32px;padding:55px 35px;text-align:center;color:#fff;box-shadow:0 25px 60px rgba(23,105,224,.22)}
+.cta-box h2{font-size:38px;margin:0 0 10px}.cta-box p{color:#dbe9f8;margin:0 auto 24px;max-width:620px;line-height:1.8}
+footer{padding:30px 0;color:#718196;text-align:center;font-size:13px}
+.modal{position:fixed;inset:0;background:rgba(5,18,32,.58);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;z-index:100;padding:18px}
+.modal.open{display:flex}
+.modal-box{width:min(480px,100%);background:#fff;border-radius:25px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.25)}
+.modal-box h2{margin:0;color:var(--navy)}.modal-box p{color:var(--muted);font-size:13px;line-height:1.7}
+.form-group{margin:14px 0}.form-group label{display:block;font-size:12px;font-weight:800;margin-bottom:7px;color:#46586b}
+.input{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;outline:none}.input:focus{border-color:#8db6ef;box-shadow:0 0 0 3px rgba(23,105,224,.08)}
+.modal-actions{display:flex;gap:10px;margin-top:18px}.modal-actions .btn{flex:1}
+.close{float:right;border:0;background:#f2f5f8;width:36px;height:36px;border-radius:10px;cursor:pointer}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#102a43;color:#fff;padding:12px 17px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:200;font-size:13px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.sticky-cta{display:none}
+@media(max-width:900px){
+ .hero-grid,.today{grid-template-columns:1fr}.cards4,.steps{grid-template-columns:repeat(2,1fr)}
+ .navlinks{display:none}.hero{padding-top:45px}
+}
+@media(max-width:600px){
+ .container{width:min(100% - 22px,1160px)}.nav-inner{height:64px}.brand{font-size:16px}.brand-badge{width:34px;height:34px}
+ .hero{padding:38px 0 25px}.hero p{font-size:15px}.hero-actions .btn{width:100%}
+ h1{font-size:40px}.section{padding:52px 0}.section-head h2{font-size:28px}
+ .cards4,.steps{grid-template-columns:1fr}.dash-metrics{grid-template-columns:1fr 1fr 1fr}.dashboard{padding:22px;border-radius:24px}
+ .today-main,.today-side{padding:21px}.today-main h3{font-size:27px}.actions4{grid-template-columns:1fr 1fr}
+ .cta-box{padding:40px 20px;border-radius:25px}.cta-box h2{font-size:29px}
+ .sticky-cta{display:block;position:fixed;bottom:12px;left:12px;right:12px;z-index:60}.sticky-cta .btn{width:100%;box-shadow:0 15px 35px rgba(10,40,70,.25)}
+ footer{padding-bottom:90px}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+ <div class="container nav-inner">
+  <a class="brand" href="#"><span class="brand-badge">N</span> Nursing Challenge</a>
+  <nav class="navlinks">
+   <a href="#challenge">চ্যালেঞ্জ</a><a href="#today">আজকের Target</a><a href="#roadmap">Roadmap</a><a href="#routine">রুটিন</a>
+  </nav>
+  <button class="btn btn-primary" onclick="openModal()">🚀 চ্যালেঞ্জ শুরু করি</button>
+ </div>
+</header>
+
+<main>
+<section class="hero">
+ <div class="container hero-grid">
+  <div>
+   <span class="kicker">🔥 105 DAYS • DAILY ACTION PLAN</span>
+   <h1>১০৫ দিনে নার্স স্বপ্ন পূরণের চ্যালেঞ্জ</h1>
+   <p>নিয়মিত পড়াশোনায় ভয় নয়—প্রতিদিনের নির্দিষ্ট Target, ক্লাস, পরীক্ষা, প্রশ্ন ব্যাংক ও বইয়ের মাধ্যমে ধাপে ধাপে এগিয়ে চলুন নার্সিং ভর্তি পরীক্ষার প্রস্তুতিতে।</p>
+   <div class="hero-actions">
+    <button class="btn btn-primary" onclick="openModal()">🚀 চ্যালেঞ্জ শুরু করি</button>
+    <a class="btn btn-soft" href="#routine">📋 ১০৫ দিনের রুটিন দেখুন</a>
+   </div>
+  </div>
+  <div class="hero-card">
+   <div class="ring"><div class="ring-content"><strong>105</strong><span>Days Challenge</span></div></div>
+   <div class="mini-stats">
+    <div class="mini"><b>105</b><span>দিন</span></div>
+    <div class="mini"><b>4</b><span>Learning Actions</span></div>
+    <div class="mini"><b>1</b><span>Goal</span></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="challenge">
+ <div class="container">
+  <div class="section-head"><h2>একটি Roadmap, প্রতিদিনের একটি Target</h2><p>পুরো প্রস্তুতিকে ধাপে ভাগ করে প্রতিদিন কী করতে হবে—সেটি চোখের সামনে রাখুন।</p></div>
+  <div class="cards4">
+   <div class="stage"><div class="icon">📚</div><h3>Basic to Advance</h3><p>ভিত্তি থেকে পূর্ণাঙ্গ প্রস্তুতির ধাপ।</p><div class="days">Day 01–100</div></div>
+   <div class="stage"><div class="icon">🔄</div><h3>Final Revision</h3><p>গুরুত্বপূর্ণ বিষয়গুলো আবার ঝালিয়ে নিন।</p><div class="days">Day 101–105*</div></div>
+   <div class="stage"><div class="icon">⚡</div><h3>Quick Revision</h3><p>পরবর্তী ধাপের জন্য প্রস্তুত রাখা কাঠামো।</p><div class="days">Flexible</div></div>
+   <div class="stage"><div class="icon">🏆</div><h3>Model Test</h3><p>পরীক্ষার মাধ্যমে Final Preparation-এর কাঠামো।</p><div class="days">Flexible</div></div>
+  </div>
+  <p style="font-size:11px;color:#7b8795;margin-top:13px">* এই HTML demo-তে 105-day version দেখানো হয়েছে; সরবরাহকৃত PDF-তে মূল রুটিন 150 দিন পর্যন্ত বিস্তৃত।</p>
+ </div>
+</section>
+
+<section class="section" id="progress">
+ <div class="container">
+  <div class="dashboard">
+   <div class="dash-top">
+    <div class="dash-title"><small id="welcome">আপনার ১০৫ দিনের Challenge</small><h2 id="dashDay">Day 01</h2></div>
+    <span id="remainingBadge" class="kicker">🚀 শুরু করুন</span>
+   </div>
+   <div class="progress"><span id="progressBar" style="width:1%"></span></div>
+   <div class="dash-metrics">
+    <div class="dmetric"><b id="metricCompleted">0</b><span>Completed Days</span></div>
+    <div class="dmetric"><b id="metricPercent">1%</b><span>Progress</span></div>
+    <div class="dmetric"><b id="metricRemaining">104</b><span>Days Remaining</span></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="today">
+ <div class="container">
+  <div class="section-head"><h2>আজকের চ্যালেঞ্জ</h2><p>আপনি যেদিন Challenge শুরু করবেন, সেদিন থেকেই আপনার Day-1 গণনা শুরু হবে।</p></div>
+  <div class="today">
+   <div class="today-main">
+    <span class="day-pill" id="todayDay">DAY 01</span>
+    <h3 id="todaySubject">বাংলা</h3>
+    <div class="topic" id="todayTopic">বাংলা সাহিত্য — প্রতিদান, পদ্মা, বৃষ্টি</div>
+    <div class="meta"><span class="tag" id="todayCourse">Basic to Advance</span><span class="tag" id="todayLecture">বাংলা-১</span><span class="tag" id="todayDate"></span></div>
+   </div>
+   <div class="today-side">
+    <div class="actions4">
+     <button class="action" onclick="actionToast('ক্লাস')"><div class="emoji">🎥</div><b>ক্লাস করি</b><span>আজকের Topic-এর ক্লাস</span></button>
+     <button class="action" onclick="actionToast('পরীক্ষা')"><div class="emoji">📝</div><b>পরীক্ষা দেই</b><span>আজকের পড়া যাচাই</span></button>
+     <button class="action" onclick="actionToast('প্রশ্ন ব্যাংক')"><div class="emoji">📚</div><b>প্রশ্ন সলভ করি</b><span>Topic ভিত্তিক অনুশীলন</span></button>
+     <button class="action" onclick="actionToast('বই')"><div class="emoji">📖</div><b>বই পড়ি</b><span>আজকের Topic বই থেকে</span></button>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="roadmap">
+ <div class="container">
+  <div class="section-head"><h2>আপনার ১০৫ দিনের যাত্রা</h2><p>Completed → Current → Upcoming — এক নজরে বুঝুন আপনি কোথায় আছেন।</p></div>
+  <div class="roadmap"><div class="roadline" id="roadline"></div></div>
+ </div>
+</section>
+
+<section class="section" id="routine">
+ <div class="container">
+  <div class="section-head"><h2>১০৫ দিনের পূর্ণাঙ্গ রুটিন</h2><p>কোন দিন কোন Course, Subject, Lecture ও Topic—সব এক জায়গায়।</p></div>
+  <div class="table-card">
+   <div class="filters">
+    <select id="courseFilter" class="select"><option value="">সব Course</option></select>
+    <select id="subjectFilter" class="select"><option value="">সব Subject</option></select>
+    <button class="btn btn-soft" onclick="resetFilters()">↺ Reset</button>
+   </div>
+   <div class="table-scroll">
+    <table><thead><tr><th>Day</th><th>Course</th><th>Subject</th><th>Lecture</th><th>Topic</th><th>Action</th></tr></thead>
+    <tbody id="routineBody"></tbody></table>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="container">
+  <div class="section-head"><h2>কীভাবে Challenge কাজ করবে?</h2><p>চারটি সহজ ধাপে প্রতিদিনের পড়াশোনাকে একটি ধারাবাহিকতায় আনুন।</p></div>
+  <div class="steps">
+   <div class="step"><span class="step-num">STEP 01</span><h3>চ্যালেঞ্জ শুরু করুন</h3><p>নাম ও মোবাইল নম্বর দিয়ে Join করুন।</p></div>
+   <div class="step"><span class="step-num">STEP 02</span><h3>Day-1 থেকে শুরু</h3><p>আপনি যেদিন Join করবেন, সেদিনই আপনার Day-1।</p></div>
+   <div class="step"><span class="step-num">STEP 03</span><h3>Daily Target</h3><p>ক্লাস → পরীক্ষা → প্রশ্ন ব্যাংক → বই—আজকের কাজ সম্পন্ন করুন।</p></div>
+   <div class="step"><span class="step-num">STEP 04</span><h3>Day-105</h3><p>ধারাবাহিকভাবে Roadmap অনুসরণ করে Challenge শেষ করুন।</p></div>
+  </div>
+ </div>
+</section>
+
+<section class="cta">
+ <div class="container">
+  <div class="cta-box">
+   <h2>নার্স হওয়ার স্বপ্ন শুধু স্বপ্ন নয়—এটা একটি লক্ষ্য।</h2>
+   <p>আজ শুরু করুন। প্রতিদিনের একটি Target সম্পন্ন করুন। একদিন একদিন করে এগিয়ে যান আপনার Nursing Admission Goal-এর দিকে।</p>
+   <button class="btn" style="background:#fff;color:#145da8" onclick="openModal()">🔥 আজ থেকেই Day-1 শুরু করুন</button>
+  </div>
+ </div>
+</section>
+</main>
+
+<footer>© 2026 Nursing Challenge • 105-Day Nursing Preparation System</footer>
+
+<div class="sticky-cta"><button class="btn btn-primary" onclick="openModal()">🔥 আজকের Challenge শুরু করুন</button></div>
+
+<div class="modal" id="modal">
+ <div class="modal-box">
+  <button class="close" onclick="closeModal()">✕</button>
+  <h2>আপনার ১০৫ দিনের Challenge শুরু করুন</h2>
+  <p>আপনি যেদিন Registration করবেন, সেই দিন থেকেই আপনার Day-1 গণনা শুরু হবে।</p>
+  <form onsubmit="startChallenge(event)">
+   <div class="form-group"><label>আপনার নাম</label><input id="nameInput" class="input" required placeholder="আপনার নাম লিখুন"></div>
+   <div class="form-group"><label>মোবাইল নাম্বার</label><input id="mobileInput" class="input" required inputmode="tel" placeholder="01XXXXXXXXX"></div>
+   <div class="modal-actions"><button type="button" class="btn btn-soft" onclick="closeModal()">পরে</button><button class="btn btn-primary">🚀 আমার Challenge শুরু করি</button></div>
+  </form>
+ </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA = [{"day": 1, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-১", "topic": "বাংলা সাহিত্য — প্রতিদান, পদ্মা, বৃষ্টি"}, {"day": 2, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-২", "topic": "বাংলা ভাষা ও ব্যাকরণ — বাংলার নবীন লেখকদের প্রতি নিবেদন, আহ্বান"}, {"day": 3, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-৩", "topic": "অপরিচিতা, সোনার তরী"}, {"day": 4, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-৪", "topic": "ধ্বনির পরিবর্তন, সন্ধি"}, {"day": 5, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-৫", "topic": "পুরুষ ও স্ত্রীবাচক শব্দ, বচন, সমাস"}, {"day": 6, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-৬", "topic": "আমার পথ, বিদ্রোহী"}, {"day": 7, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-৭", "topic": "উপসর্গ, অনুসর্গ, কারক ও বিভক্তি"}, {"day": 8, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-৮", "topic": "বিলাসী, মাসি-পিসি, বায়ান্নর দিনগুলো"}, {"day": 9, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-৯", "topic": "ণ-ত্ব বিধান, ষ-ত্ব বিধান, শব্দ"}, {"day": 10, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-১০", "topic": "পদ প্রকরণ"}, {"day": 11, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-১১", "topic": "ক্রিয়ার কাল — তাহারেই পড়ে মনে, আঠারো বছর বয়স"}, {"day": 12, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-১২", "topic": "বাক্য ও বাক্যের প্রকরণ, যতিচিহ্ন"}, {"day": 13, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-১৩", "topic": "ধাতু, প্রকৃতি-প্রত্যয়"}, {"day": 14, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-১৪", "topic": "মানব কল্যাণ, রেইনকোট"}, {"day": 15, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-১৫", "topic": "বিপরীতার্থক শব্দ, প্রতিশব্দ"}, {"day": 16, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-১৬", "topic": "পারিভাষিক শব্দ, প্রবাদ, অনুবাদ"}, {"day": 17, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-১৭", "topic": "ফেব্রুয়ারি ১৯৬৯, আমি কিংবদন্তির কথা বলছি"}, {"day": 18, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-১৮", "topic": "এক কথায় প্রকাশ, বাগধারা"}, {"day": 19, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-১৯", "topic": "বানান শুদ্ধিকরণ, ধ্বনি ও বর্ণ, অভিধানিক ক্রম"}, {"day": 20, "course": "Basic to Advance", "subject": "বাংলা", "lecture": "বাংলা-২০", "topic": "লালসালু, সিরাজউদ্দৌলা"}, {"day": 21, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-১", "topic": "Parts of Speech, Synonym & Antonym"}, {"day": 22, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-২", "topic": "Details of Noun & Determiner"}, {"day": 23, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-৩", "topic": "Number & Gender"}, {"day": 24, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-৪", "topic": "Pronoun & Antecedent, Preposition"}, {"day": 25, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-৫", "topic": "Adjective"}, {"day": 26, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-৬", "topic": "Degree of Comparison, Spelling"}, {"day": 27, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-৭", "topic": "Adverb & Article"}, {"day": 28, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-৮", "topic": "Details of Verb, Group Verb"}, {"day": 29, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-৯", "topic": "Conditional Sentence, One Word Substitution"}, {"day": 30, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-১০", "topic": "Completing Sentence & Conjunction"}, {"day": 31, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-১১", "topic": "Details of Tense"}, {"day": 32, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-১২", "topic": "Narration"}, {"day": 33, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-১৩", "topic": "Voice Change"}, {"day": 34, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-১৪", "topic": "Phrase-Clause"}, {"day": 35, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-১৫", "topic": "Right Form of Verb"}, {"day": 36, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-১৬", "topic": "Subject-Verb Agreement"}, {"day": 37, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-১৭", "topic": "Causative & Subjunctive Verb"}, {"day": 38, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-১৮", "topic": "Sentence"}, {"day": 39, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-১৯", "topic": "Transformation of Sentence"}, {"day": 40, "course": "Basic to Advance", "subject": "ইংরেজি", "lecture": "ইংরেজি-২০", "topic": "Literature"}, {"day": 41, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-১", "topic": "বাংলাদেশ পরিচিতি"}, {"day": 42, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-২", "topic": "প্রাচীন বাংলার ইতিহাস"}, {"day": 43, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-৩", "topic": "জাতীয় ও আন্তর্জাতিক বিষয়াবলি, দিবস"}, {"day": 44, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-৪", "topic": "বাংলাদেশের শ্রেষ্ঠ, দীর্ঘতম, ক্ষুদ্রতম, উচ্চতম, গভীরতম"}, {"day": 45, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-৫", "topic": "বাংলাদেশের নদ-নদী এবং হাওড়-বিল, হ্রদ ও সমুদ্র"}, {"day": 46, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-৬", "topic": "বৈশ্বিক ইতিহাস"}, {"day": 47, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-৭", "topic": "ভাষা আন্দোলন, ১৯৬৯-এর গণঅভ্যুত্থান"}, {"day": 48, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-৮", "topic": "মহান মুক্তিযুদ্ধ"}, {"day": 49, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-৯", "topic": "মুক্তিযুদ্ধ-পরবর্তী ঘটনাপ্রবাহ ও জুলাই আন্দোলন"}, {"day": 50, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-১০", "topic": "যুদ্ধ, বিপ্লব, আঞ্চলিক জোট"}, {"day": 51, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-১১", "topic": "জাতিপুঞ্জ, জাতিসংঘ ও অন্যান্য সংস্থা ও সদর দপ্তর"}, {"day": 52, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-১২", "topic": "বিশ্বের আইনসভা, সরকার ব্যবস্থা, রাজধানী, পার্লামেন্ট"}, {"day": 53, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-১৩", "topic": "বিশ্বের শ্রেষ্ঠ, দীর্ঘতম, ক্ষুদ্রতম, উচ্চতম, গভীরতম নদ-নদী"}, {"day": 54, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-১৪", "topic": "ক্ষুদ্র নৃগোষ্ঠী, জাদুঘর, স্থাপত্য, বিখ্যাত উক্তি"}, {"day": 55, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-১৫", "topic": "বিজ্ঞান ও যোগাযোগ প্রযুক্তি, খেলাধুলা, Abbreviation"}, {"day": 56, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-১৬", "topic": "স্মরণীয় ব্যক্তি, বাংলা সাহিত্য"}, {"day": 57, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-১৭", "topic": "পুরস্কার ও সম্মাননা, অর্থনীতি ও বাজেট"}, {"day": 58, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-১৮", "topic": "গুরুত্বপূর্ণ চুক্তি, গোয়েন্দা সংস্থা, প্রণালী, সীমারেখা"}, {"day": 59, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-১৯", "topic": "মানবিক গুণাবলী"}, {"day": 60, "course": "Basic to Advance", "subject": "সাধারণ জ্ঞান", "lecture": "সাধারণ জ্ঞান-২০", "topic": "সাম্প্রতিক বিষয়াবলি"}, {"day": 61, "course": "Basic to Advance", "subject": "সাধারণ গণিত", "lecture": "সাধারণ গণিত-১", "topic": "বাস্তব সংখ্যা এবং ভগ্নাংশ"}, {"day": 62, "course": "Basic to Advance", "subject": "সাধারণ গণিত", "lecture": "সাধারণ গণিত-২", "topic": "লসাগু, গসাগু ও ঐকিক নিয়ম"}, {"day": 63, "course": "Basic to Advance", "subject": "সাধারণ গণিত", "lecture": "সাধারণ গণিত-৩", "topic": "শতকরা, অনুপাত ও সমানুপাত এবং গড়"}, {"day": 64, "course": "Basic to Advance", "subject": "সাধারণ গণিত", "lecture": "সাধারণ গণিত-৪", "topic": "লাভ-ক্ষতি ও মুনাফা"}, {"day": 65, "course": "Basic to Advance", "subject": "সাধারণ গণিত", "lecture": "সাধারণ গণিত-৫", "topic": "সমান্তর ও গুণোত্তর ধারা"}, {"day": 66, "course": "Basic to Advance", "subject": "সাধারণ গণিত", "lecture": "সাধারণ গণিত-৬", "topic": "সমীকরণ ও বীজগাণিতিক সূত্রাবলি"}, {"day": 67, "course": "Basic to Advance", "subject": "সাধারণ গণিত", "lecture": "সাধারণ গণিত-৭", "topic": "ক্ষেত্রফল ও পরিমাপ"}, {"day": 68, "course": "Basic to Advance", "subject": "সাধারণ গণিত", "lecture": "সাধারণ গণিত-৮", "topic": "রেখা, কোণ, ত্রিভুজ, পরিমিতি"}, {"day": 69, "course": "Basic to Advance", "subject": "সাধারণ গণিত", "lecture": "সাধারণ গণিত-৯", "topic": "বৃত্ত ও কণিক"}, {"day": 70, "course": "Basic to Advance", "subject": "সাধারণ গণিত", "lecture": "সাধারণ গণিত-১০", "topic": "সূচক, লগ ও ত্রিকোণমিতি"}, {"day": 71, "course": "Basic to Advance", "subject": "পদার্থবিজ্ঞান", "lecture": "পদার্থবিজ্ঞান-১", "topic": "ভৌত জগত ও পরিমাপ এবং ভেক্টর"}, {"day": 72, "course": "Basic to Advance", "subject": "পদার্থবিজ্ঞান", "lecture": "পদার্থবিজ্ঞান-২", "topic": "গতিবিদ্যা, তরঙ্গ গতি"}, {"day": 73, "course": "Basic to Advance", "subject": "পদার্থবিজ্ঞান", "lecture": "পদার্থবিজ্ঞান-৩", "topic": "নিউটনীয় বলবিদ্যা"}, {"day": 74, "course": "Basic to Advance", "subject": "পদার্থবিজ্ঞান", "lecture": "পদার্থবিজ্ঞান-৪", "topic": "কাজ, ক্ষমতা ও শক্তি"}, {"day": 75, "course": "Basic to Advance", "subject": "পদার্থবিজ্ঞান", "lecture": "পদার্থবিজ্ঞান-৫", "topic": "পদার্থের গাঠনিক ধর্ম ও পর্যায়বৃত্ত গতি"}, {"day": 76, "course": "Basic to Advance", "subject": "পদার্থবিজ্ঞান", "lecture": "পদার্থবিজ্ঞান-৬", "topic": "আদর্শ গ্যাস ও তাপগতিবিদ্যা"}, {"day": 77, "course": "Basic to Advance", "subject": "পদার্থবিজ্ঞান", "lecture": "পদার্থবিজ্ঞান-৭", "topic": "স্থির তড়িৎ ও চল তড়িৎ"}, {"day": 78, "course": "Basic to Advance", "subject": "পদার্থবিজ্ঞান", "lecture": "পদার্থবিজ্ঞান-৮", "topic": "আলোকবিজ্ঞান এবং চৌম্বকবিজ্ঞান"}, {"day": 79, "course": "Basic to Advance", "subject": "পদার্থবিজ্ঞান", "lecture": "পদার্থবিজ্ঞান-৯", "topic": "আধুনিক পদার্থবিজ্ঞান এবং নিউক্লিয়ার পদার্থবিজ্ঞান"}, {"day": 80, "course": "Basic to Advance", "subject": "পদার্থবিজ্ঞান", "lecture": "পদার্থবিজ্ঞান-১০", "topic": "সেমিকন্ডাক্টর এবং জীবনমুখী পদার্থবিজ্ঞান"}, {"day": 81, "course": "Basic to Advance", "subject": "রসায়ন", "lecture": "রসায়ন-১", "topic": "ল্যাবরেটরির নিরাপদ ব্যবহার ও গুণগত রসায়ন"}, {"day": 82, "course": "Basic to Advance", "subject": "রসায়ন", "lecture": "রসায়ন-২", "topic": "গুণগত রসায়ন"}, {"day": 83, "course": "Basic to Advance", "subject": "রসায়ন", "lecture": "রসায়ন-৩", "topic": "মৌলের পর্যায়বৃত্ত ধর্ম ও রাসায়নিক বন্ধন"}, {"day": 84, "course": "Basic to Advance", "subject": "রসায়ন", "lecture": "রসায়ন-৪", "topic": "রাসায়নিক পরিবর্তন"}, {"day": 85, "course": "Basic to Advance", "subject": "রসায়ন", "lecture": "রসায়ন-৫", "topic": "কর্মমুখী রসায়ন + অর্থনৈতিক রসায়ন"}, {"day": 86, "course": "Basic to Advance", "subject": "রসায়ন", "lecture": "রসায়ন-৬", "topic": "পরিবেশ রসায়ন"}, {"day": 87, "course": "Basic to Advance", "subject": "রসায়ন", "lecture": "রসায়ন-৭", "topic": "পরিমাণগত রসায়ন"}, {"day": 88, "course": "Basic to Advance", "subject": "রসায়ন", "lecture": "রসায়ন-৮", "topic": "জৈব রসায়ন — ১"}, {"day": 89, "course": "Basic to Advance", "subject": "রসায়ন", "lecture": "রসায়ন-৯", "topic": "জৈব রসায়ন — ২"}, {"day": 90, "course": "Basic to Advance", "subject": "রসায়ন", "lecture": "রসায়ন-১০", "topic": "তড়িৎ রসায়ন"}, {"day": 91, "course": "Basic to Advance", "subject": "জীববিজ্ঞান", "lecture": "জীববিজ্ঞান-১", "topic": "কোষ ও এর গঠন, কোষ বিভাজন"}, {"day": 92, "course": "Basic to Advance", "subject": "জীববিজ্ঞান", "lecture": "জীববিজ্ঞান-২", "topic": "শৈবাল ও অনুজীব, কোষ বিভাজন, জীবনীশক্তি"}, {"day": 93, "course": "Basic to Advance", "subject": "জীববিজ্ঞান", "lecture": "জীববিজ্ঞান-৩", "topic": "প্রাণীর বিভিন্নতা ও শ্রেণীবিন্যাস"}, {"day": 94, "course": "Basic to Advance", "subject": "জীববিজ্ঞান", "lecture": "জীববিজ্ঞান-৪", "topic": "পরিপাক ও শোষণ, চলন ও অঙ্গচালনা"}, {"day": 95, "course": "Basic to Advance", "subject": "জীববিজ্ঞান", "lecture": "জীববিজ্ঞান-৫", "topic": "রক্ত ও সংবহন, শ্বসন ও শ্বাসক্রিয়া"}, {"day": 96, "course": "Basic to Advance", "subject": "জীববিজ্ঞান", "lecture": "জীববিজ্ঞান-৬", "topic": "নগ্নবীজী ও আবৃতবীজী, ব্রায়োফাইটা ও টেরিডোফাইটা"}, {"day": 97, "course": "Basic to Advance", "subject": "জীববিজ্ঞান", "lecture": "জীববিজ্ঞান-৭", "topic": "উদ্ভিদ শারীরতত্ত্ব, জিনতত্ত্ব ও বিবর্তন"}, {"day": 98, "course": "Basic to Advance", "subject": "জীববিজ্ঞান", "lecture": "জীববিজ্ঞান-৮", "topic": "উদ্ভিদের প্রজনন, টিস্যু ও টিস্যুতন্ত্র"}, {"day": 99, "course": "Basic to Advance", "subject": "জীববিজ্ঞান", "lecture": "জীববিজ্ঞান-৯", "topic": "মানব জীবনের ধারাবাহিকতা, সমন্বয় ও নিয়ন্ত্রণ"}, {"day": 100, "course": "Basic to Advance", "subject": "জীববিজ্ঞান", "lecture": "জীববিজ্ঞান-১০", "topic": "কোষ রসায়ন, প্রাণীর আচরণ, মানবদেহের প্রতিরক্ষা"}, {"day": 101, "course": "Final Revision", "subject": "মিশ্র", "lecture": "ফাইনাল রিভিশন-১", "topic": "বাংলা-১ + সাধারণ গণিত-১ + পদার্থবিজ্ঞান-১"}, {"day": 102, "course": "Final Revision", "subject": "মিশ্র", "lecture": "ফাইনাল রিভিশন-২", "topic": "বাংলা-২ + ইংরেজি-১ + সাধারণ জ্ঞান-১"}, {"day": 103, "course": "Final Revision", "subject": "মিশ্র", "lecture": "ফাইনাল রিভিশন-৩", "topic": "ইংরেজি-২ + সাধারণ জ্ঞান-২"}, {"day": 104, "course": "Final Revision", "subject": "মিশ্র", "lecture": "ফাইনাল রিভিশন-৪", "topic": "বাংলা-৩ + সাধারণ গণিত-২ + পদার্থবিজ্ঞান-২"}, {"day": 105, "course": "Final Revision", "subject": "মিশ্র", "lecture": "ফাইনাল রিভিশন-৫", "topic": "বাংলা-৪ + ইংরেজি-৩ + সাধারণ জ্ঞান-৩"}];
+const KEY = "nursing105Challenge";
+
+function todayString(){
+ const d=new Date();
+ return d.toLocaleDateString("bn-BD",{day:"numeric",month:"long",year:"numeric"});
+}
+function getState(){
+ let s=JSON.parse(localStorage.getItem(KEY)||"null");
+ if(!s) return {name:"",mobile:"",start:null};
+ return s;
+}
+function currentDay(){
+ const s=getState();
+ if(!s.start) return 1;
+ const start=new Date(s.start+"T00:00:00");
+ const now=new Date(); now.setHours(0,0,0,0);
+ return Math.min(105, Math.max(1, Math.floor((now-start)/86400000)+1));
+}
+function renderDashboard(){
+ const s=getState(), day=currentDay(), item=DATA[day-1];
+ const completed=day-1, pct=Math.round(day/105*100), remain=105-day;
+ document.getElementById("welcome").textContent=s.name?`স্বাগতম, ${s.name} 👋`:"আপনার ১০৫ দিনের Challenge";
+ document.getElementById("dashDay").textContent=`Day ${String(day).padStart(2,"0")}`;
+ document.getElementById("progressBar").style.width=pct+"%";
+ document.getElementById("metricCompleted").textContent=completed;
+ document.getElementById("metricPercent").textContent=pct+"%";
+ document.getElementById("metricRemaining").textContent=remain;
+ document.getElementById("remainingBadge").textContent=s.start?(remain?`🔥 আরও ${remain} দিন`:"🏆 Challenge Complete"):"🚀 শুরু করুন";
+ document.getElementById("todayDay").textContent=`DAY ${String(day).padStart(2,"0")}`;
+ document.getElementById("todaySubject").textContent=item.subject;
+ document.getElementById("todayTopic").textContent=item.topic;
+ document.getElementById("todayCourse").textContent=item.course;
+ document.getElementById("todayLecture").textContent=item.lecture;
+ document.getElementById("todayDate").textContent=todayString();
+ renderRoadmap(day); renderTable(day);
+}
+function renderRoadmap(day){
+ const el=document.getElementById("roadline"); el.innerHTML="";
+ for(let i=1;i<=105;i++){
+  const wrap=document.createElement("div"); wrap.className="node-wrap";
+  const n=document.createElement("div"); n.className="node "+(i<day?"done":i===day?"current":""); n.textContent=i;
+  n.title=`Day ${i}`;
+  wrap.appendChild(n);
+  if(i<105){const c=document.createElement("div"); c.className="connector "+(i<day?"done":""); wrap.appendChild(c)}
+  el.appendChild(wrap);
+ }
+}
+function populateFilters(){
+ const courses=[...new Set(DATA.map(x=>x.course))], subjects=[...new Set(DATA.map(x=>x.subject))];
+ for(const [id,list] of [["courseFilter",courses],["subjectFilter",subjects]]){
+  const sel=document.getElementById(id);
+  list.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;sel.appendChild(o)});
+  sel.addEventListener("change",()=>renderTable(currentDay()));
+ }
+}
+function renderTable(day){
+ const cf=document.getElementById("courseFilter").value, sf=document.getElementById("subjectFilter").value;
+ const body=document.getElementById("routineBody"); body.innerHTML="";
+ DATA.filter(x=>(!cf||x.course===cf)&&(!sf||x.subject===sf)).forEach(x=>{
+  const tr=document.createElement("tr"); if(x.day===day) tr.className="current-row";
+  tr.innerHTML=`<td class="day-cell">Day-${x.day}${x.day===day?' <span style="font-size:10px;color:#0a8d77">● আজ</span>':''}</td>
+   <td>${x.course}</td><td>${x.subject}</td><td>${x.lecture}</td><td>${x.topic}</td>
+   <td><button class="row-btn" onclick="actionToast('Day ${x.day}')">View</button></td>`;
+  body.appendChild(tr);
+ });
+}
+function resetFilters(){document.getElementById("courseFilter").value="";document.getElementById("subjectFilter").value="";renderTable(currentDay())}
+function openModal(){document.getElementById("modal").classList.add("open")}
+function closeModal(){document.getElementById("modal").classList.remove("open")}
+function startChallenge(e){
+ e.preventDefault();
+ const name=document.getElementById("nameInput").value.trim(), mobile=document.getElementById("mobileInput").value.trim();
+ const start=new Date(); start.setHours(0,0,0,0);
+ localStorage.setItem(KEY,JSON.stringify({name,mobile,start:start.toISOString().slice(0,10)}));
+ closeModal(); renderDashboard(); actionToast("Challenge শুরু হয়েছে — আজ আপনার Day-1!");
+ document.getElementById("progress").scrollIntoView({behavior:"smooth"});
+}
+function actionToast(label){
+ const t=document.getElementById("toast"); t.textContent=`${label} অপশনটি এখানে আপনার LMS/Exam/Book link-এর সাথে যুক্ত করা যাবে।`;t.classList.add("show");
+ clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove("show"),2600);
+}
+populateFilters(); renderDashboard();
+</script>
+</body>
+</html>
