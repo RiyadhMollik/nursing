@@ -6,6 +6,25 @@ const BANGLA_DIGITS = (s) => String(s).replace(/[0-9]/g, (d) => "০১২৩৪
 const PHASES = [
   "বেসিক টু এডভান্স", "ফাইনাল রিভিশন", "কুইক রিভিশন", "মডেল টেস্ট",
 ];
+// Same four keys, order and labels the dashboard renders as resource cards.
+const RESOURCE_FIELDS = [
+  { key: "live_class_link", icon: "🎥", label: "ক্লাস করি", hint: "লাইভ বা রেকর্ডেড ক্লাসের লিংক" },
+  { key: "exam_link", icon: "📝", label: "পরীক্ষা দেই", hint: "আজকের পরীক্ষার লিংক" },
+  { key: "question_bank_link", icon: "📚", label: "প্রশ্ন সলভ করি", hint: "প্রশ্ন ব্যাংক / অনুশীলনের লিংক" },
+  { key: "book_link", icon: "📖", label: "বই পড়ি", hint: "বই বা PDF-এর লিংক" },
+];
+const linkCount = (r) => RESOURCE_FIELDS.filter((f) => r[f.key]).length;
+
+/** Flatten a DRF error body into one readable line. */
+const errText = (data, fallback = "সেভ ব্যর্থ হয়েছে") => {
+  if (!data) return fallback;
+  if (typeof data === "string") return data;
+  if (data.detail) return String(data.detail);
+  const parts = Object.entries(data).map(
+    ([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`
+  );
+  return parts.join(" · ") || fallback;
+};
 
 export default function AdminPage() {
   const [token, setToken] = useState("");
@@ -68,7 +87,7 @@ export default function AdminPage() {
         <div className="admin-login-card">
           <div className="al-ic">🛡️</div>
           <h2>অ্যাডমিন প্যানেল</h2>
-          <p className="sub">AAP Nursing Challenge — প্রশাসনিক নিয়ন্ত্রণ</p>
+          <p className="sub">নার্সিং পাঠশালা — প্রশাসনিক নিয়ন্ত্রণ</p>
           <form onSubmit={doLogin}>
             <input className="input" placeholder="ইউজারনেম" value={loginForm.username} onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })} required />
             <input className="input" type="password" placeholder="পাসওয়ার্ড" value={loginForm.password} onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} required />
@@ -90,14 +109,14 @@ export default function AdminPage() {
         <button className="admin-burger" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="মেনু">
           <span></span><span></span><span></span>
         </button>
-        <span className="admin-mobile-title">🛡️ AAP Admin</span>
+        <span className="admin-mobile-title">🛡️ নার্সিং পাঠশালা অ্যাডমিন</span>
       </div>
       {sidebarOpen && <div className="admin-overlay" onClick={() => setSidebarOpen(false)} />}
       <div className="admin-shell">
         {/* Sidebar */}
         <aside className={`admin-sidebar ${sidebarOpen ? "open" : ""}`}>
           <div className="as-brand">
-            <div className="brand"><span className="brand-badge">ন</span> AAP Admin</div>
+            <div className="brand"><span className="brand-badge">ন</span> নার্সিং পাঠশালা</div>
             <div className="role">👋 {username}</div>
           </div>
           <nav className="as-nav">
@@ -354,7 +373,8 @@ function RoutineTab({ authFetch }) {
 function RoutineForm({ routine, authFetch, onClose, onSaved }) {
   const [form, setForm] = useState(routine || {
     day_number: "", phase: "বেসিক টু এডভান্স", subject: "", lecture: "",
-    bsc_topic: "", diploma_topic: "", live_class_link: "", question_bank_link: "", exam_link: "", book_link: "",
+    bsc_lecture: "", bsc_topic: "", diploma_lecture: "", diploma_topic: "", motivational_line: "",
+    live_class_link: "", question_bank_link: "", exam_link: "", book_link: "",
   });
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
@@ -365,12 +385,12 @@ function RoutineForm({ routine, authFetch, onClose, onSaved }) {
     setErr("");
     try {
       const body = { ...form, day_number: parseInt(form.day_number) };
-      if (routine) {
-        await authFetch(`/admin/routine/${routine.id}/`, { method: "PUT", body: JSON.stringify(body) });
-      } else {
-        await authFetch("/admin/routine/", { method: "POST", body: JSON.stringify(body) });
-      }
-      onSaved();
+      const res = routine
+        ? await authFetch(`/admin/routine/${routine.id}/`, { method: "PUT", body: JSON.stringify(body) })
+        : await authFetch("/admin/routine/", { method: "POST", body: JSON.stringify(body) });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(errText(data));
+      onSaved(data);
     } catch (e) { setErr(e.message); }
     setSaving(false);
   };
@@ -388,8 +408,11 @@ function RoutineForm({ routine, authFetch, onClose, onSaved }) {
             <div><label>সাবজেক্ট</label><input className="input" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} /></div>
             <div><label>লেকচার</label><input className="input" value={form.lecture} onChange={(e) => setForm({ ...form, lecture: e.target.value })} /></div>
           </div>
+          <div><label>BSc লেকচার</label><input className="input" value={form.bsc_lecture || ""} onChange={(e) => setForm({ ...form, bsc_lecture: e.target.value })} /></div>
           <div><label>BSc টপিক</label><textarea className="input" value={form.bsc_topic} onChange={(e) => setForm({ ...form, bsc_topic: e.target.value })} /></div>
+          <div><label>ডিপ্লোমা লেকচার</label><input className="input" value={form.diploma_lecture || ""} onChange={(e) => setForm({ ...form, diploma_lecture: e.target.value })} /></div>
           <div><label>ডিপ্লোমা টপিক</label><textarea className="input" value={form.diploma_topic} onChange={(e) => setForm({ ...form, diploma_topic: e.target.value })} /></div>
+          <div><label>মোটিভেশনাল লাইন</label><textarea className="input" value={form.motivational_line || ""} onChange={(e) => setForm({ ...form, motivational_line: e.target.value })} /></div>
           <div className="af-row">
             <div><label>লাইভ ক্লাস লিংক</label><input className="input" value={form.live_class_link} onChange={(e) => setForm({ ...form, live_class_link: e.target.value })} /></div>
             <div><label>প্রশ্ন ব্যাংক লিংক</label><input className="input" value={form.question_bank_link} onChange={(e) => setForm({ ...form, question_bank_link: e.target.value })} /></div>
@@ -414,63 +437,213 @@ function ResourcesTab({ authFetch }) {
   const [routines, setRoutines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [flash, setFlash] = useState("");
 
   const load = useCallback(() => {
     setLoading(true);
-    authFetch("/admin/routine/").then((r) => r.json()).then((d) => setRoutines(d.routines || [])).finally(() => setLoading(false));
+    authFetch("/admin/routine/")
+      .then((r) => r.json())
+      .then((d) => setRoutines(d.routines || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [authFetch]);
 
   useEffect(() => { load(); }, [load]);
 
-  const withLinks = routines.filter((r) => r.live_class_link || r.question_bank_link || r.exam_link || r.book_link);
+  const daysWithLinks = routines.filter((r) => linkCount(r) > 0).length;
+  const totalLinks = routines.reduce((n, r) => n + linkCount(r), 0);
+
+  const q = search.trim().toLowerCase();
+  const visible = routines.filter((r) => {
+    const cnt = linkCount(r);
+    if (filter === "with" && cnt === 0) return false;
+    if (filter === "without" && cnt > 0) return false;
+    if (!q) return true;
+    return (
+      String(r.day_number).includes(q) ||
+      (r.subject || "").toLowerCase().includes(q) ||
+      (r.lecture || "").toLowerCase().includes(q)
+    );
+  });
+
+  // Replace the saved row in place so the table matches the dashboard immediately.
+  const onSaved = (updated) => {
+    setEditing(null);
+    if (updated && updated.id) {
+      setRoutines((rows) => rows.map((r) => (r.id === updated.id ? { ...r, ...updated } : r)));
+      setFlash(`Day-${BANGLA_DIGITS(updated.day_number)} এর লিংক সেভ হয়েছে — শিক্ষার্থীর ড্যাশবোর্ডে দেখা যাবে।`);
+      setTimeout(() => setFlash(""), 4000);
+    } else {
+      load();
+    }
+  };
 
   return (
     <>
       <div className="admin-header">
-        <div><h1>🔗 রিসোর্স লিংক ম্যানেজমেন্ট</h1><p>প্রতিদিনের ক্লাস/পরীক্ষা/প্রশ্ন/বই লিংক যোগ করুন</p></div>
+        <div>
+          <h1>🔗 রিসোর্স লিংক ম্যানেজমেন্ট</h1>
+          <p>এখানে যোগ করা লিংকই শিক্ষার্থীর ড্যাশবোর্ডের “আজকের রিসোর্স” কার্ডে দেখা যায়</p>
+        </div>
+        <button className="btn btn-ghost" onClick={load} disabled={loading}>🔄 রিফ্রেশ</button>
       </div>
-      <div className="admin-table-card" style={{ marginBottom: 24 }}>
-        <div className="admin-table-head"><h3>📋 লিংক সহ রুটিন ({BANGLA_DIGITS(withLinks.length)})</h3></div>
-        {loading ? <div className="admin-empty"><div className="em-ic">⏳</div></div> : withLinks.length === 0 ? <div className="admin-empty"><div className="em-ic">🔗</div><p>এখনও কোনো লিংক যোগ নেই। রুটিন সম্পাদনা করে লিংক যোগ করুন।</p></div> : (
-          <table className="admin-table">
-            <thead><tr><th>দিন</th><th>ক্লাস</th><th>পরীক্ষা</th><th>প্রশ্ন</th><th>বই</th><th>অ্যাকশন</th></tr></thead>
-            <tbody>
-              {withLinks.map((r) => (
-                <tr key={r.id}>
-                  <td className="day-cell">Day-{BANGLA_DIGITS(r.day_number)}</td>
-                  <td>{r.live_class_link ? "✅" : "—"}</td>
-                  <td>{r.exam_link ? "✅" : "—"}</td>
-                  <td>{r.question_bank_link ? "✅" : "—"}</td>
-                  <td>{r.book_link ? "✅" : "—"}</td>
-                  <td><button className="action-btn" onClick={() => setEditing(r)}>✏️ সম্পাদনা</button></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+
+      {flash && <div className="res-flash">✅ {flash}</div>}
+
+      <div className="admin-stats" style={{ marginBottom: 20 }}>
+        <div className="astat"><div className="ai" style={{ background: "var(--blue-light)" }}>📋</div><b>{BANGLA_DIGITS(routines.length)}</b><span>মোট রুটিন</span></div>
+        <div className="astat"><div className="ai" style={{ background: "var(--green-light)" }}>🔗</div><b>{BANGLA_DIGITS(daysWithLinks)}</b><span>লিংক আছে এমন দিন</span></div>
+        <div className="astat"><div className="ai" style={{ background: "var(--purple-light)" }}>📦</div><b>{BANGLA_DIGITS(totalLinks)}</b><span>মোট লিংক</span></div>
+        <div className="astat"><div className="ai" style={{ background: "var(--red-light)" }}>⚠️</div><b>{BANGLA_DIGITS(Math.max(0, routines.length - daysWithLinks))}</b><span>লিংক বাকি</span></div>
       </div>
+
       <div className="admin-table-card">
-        <div className="admin-table-head"><h3>📚 সব রুটিন — দ্রুত লিংক যোগ</h3></div>
-        <div style={{ maxHeight: 400, overflowY: "auto" }}>
-          <table className="admin-table">
-            <thead><tr><th>দিন</th><th>সাবজেক্ট</th><th>লিংক স্ট্যাটাস</th><th>অ্যাকশন</th></tr></thead>
-            <tbody>
-              {routines.map((r) => {
-                const cnt = [r.live_class_link, r.question_bank_link, r.exam_link, r.book_link].filter(Boolean).length;
-                return (
+        <div className="admin-table-head res-toolbar">
+          <h3>📚 দিন অনুযায়ী রিসোর্স ({BANGLA_DIGITS(visible.length)})</h3>
+          <div className="res-toolbar-controls">
+            <input
+              className="input res-search"
+              placeholder="🔍 দিন নাম্বার বা সাবজেক্ট খুঁজুন"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <div className="res-filters">
+              {[
+                { k: "all", label: "সব" },
+                { k: "with", label: "লিংক আছে" },
+                { k: "without", label: "লিংক নেই" },
+              ].map((f) => (
+                <button
+                  key={f.k}
+                  type="button"
+                  className={`res-filter ${filter === f.k ? "active" : ""}`}
+                  onClick={() => setFilter(f.k)}
+                >{f.label}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="admin-empty"><div className="em-ic">⏳</div><p>লোড হচ্ছে...</p></div>
+        ) : visible.length === 0 ? (
+          <div className="admin-empty"><div className="em-ic">🔗</div><p>কোনো রুটিন মেলেনি।</p></div>
+        ) : (
+          <div style={{ maxHeight: 620, overflowY: "auto" }}>
+            <table className="admin-table">
+              <thead>
+                <tr><th>দিন</th><th>সাবজেক্ট</th><th>রিসোর্স লিংক</th><th>অ্যাকশন</th></tr>
+              </thead>
+              <tbody>
+                {visible.map((r) => (
                   <tr key={r.id}>
                     <td className="day-cell">Day-{BANGLA_DIGITS(r.day_number)}</td>
                     <td>{r.subject || "—"}</td>
-                    <td>{cnt === 0 ? <span style={{ color: "var(--muted)" }}>কোনো লিংক নেই</span> : <span style={{ color: "var(--green)", fontWeight: 700 }}>{BANGLA_DIGITS(cnt)}/৪ লিংক</span>}</td>
-                    <td><button className="action-btn" onClick={() => setEditing(r)}>✏️ লিংক যোগ</button></td>
+                    <td>
+                      <div className="res-chips">
+                        {RESOURCE_FIELDS.map((f) => (r[f.key] ? (
+                          <a key={f.key} className="res-chip on" href={r[f.key]} target="_blank" rel="noreferrer" title={r[f.key]}>
+                            <span aria-hidden="true">{f.icon}</span> {f.label}
+                          </a>
+                        ) : (
+                          <span key={f.key} className="res-chip" title="লিংক যোগ হয়নি">
+                            <span aria-hidden="true">{f.icon}</span> {f.label}
+                          </span>
+                        )))}
+                      </div>
+                    </td>
+                    <td>
+                      <button className="action-btn" onClick={() => setEditing(r)}>
+                        ✏️ {linkCount(r) ? "সম্পাদনা" : "লিংক যোগ"}
+                      </button>
+                    </td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
-      {editing && <RoutineForm routine={editing} authFetch={authFetch} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); load(); }} />}
+
+      {editing && (
+        <ResourceLinkForm
+          routine={editing}
+          authFetch={authFetch}
+          onClose={() => setEditing(null)}
+          onSaved={onSaved}
+        />
+      )}
     </>
+  );
+}
+
+/* Link-only editor: saves just the four dashboard resource links for one day. */
+function ResourceLinkForm({ routine, authFetch, onClose, onSaved }) {
+  const [links, setLinks] = useState(() =>
+    Object.fromEntries(RESOURCE_FIELDS.map((f) => [f.key, routine[f.key] || ""]))
+  );
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
+
+  const save = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setErr("");
+    try {
+      const res = await authFetch(`/admin/routine/${routine.id}/`, {
+        method: "PUT",
+        body: JSON.stringify(links),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(errText(data));
+      onSaved(data);
+    } catch (e2) {
+      setErr(e2.message || "সেভ ব্যর্থ হয়েছে");
+    }
+    setSaving(false);
+  };
+
+  return (
+    <div className="admin-modal" onClick={onClose}>
+      <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>
+        <h3>🔗 Day-{BANGLA_DIGITS(routine.day_number)} — রিসোর্স লিংক</h3>
+        <p className="rl-sub">
+          {routine.subject || routine.lecture || "আজকের পড়াশোনার লিংক"} · লিংক খালি রাখলে ড্যাশবোর্ডে কার্ডটি নিষ্ক্রিয় থাকবে
+        </p>
+        <form className="admin-form" onSubmit={save}>
+          {RESOURCE_FIELDS.map((f) => (
+            <div className="rl-row" key={f.key}>
+              <label htmlFor={`rl-${f.key}`}>
+                <span className="rl-ic" aria-hidden="true">{f.icon}</span> {f.label}
+                <em>{f.hint}</em>
+              </label>
+              <div className="rl-input">
+                <input
+                  id={`rl-${f.key}`}
+                  className="input"
+                  inputMode="url"
+                  placeholder="https://..."
+                  value={links[f.key]}
+                  onChange={(e) => setLinks({ ...links, [f.key]: e.target.value })}
+                />
+                {links[f.key] ? (
+                  <>
+                    <a className="action-btn" href={links[f.key]} target="_blank" rel="noreferrer">↗ টেস্ট</a>
+                    <button type="button" className="action-btn del" onClick={() => setLinks({ ...links, [f.key]: "" })}>✕</button>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          ))}
+          {err && <div className="res-error">⚠️ {err}</div>}
+          <div className="af-actions">
+            <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "সেভ হচ্ছে..." : "💾 লিংক সেভ করুন"}</button>
+            <button type="button" className="btn btn-ghost" onClick={onClose}>বাতিল</button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

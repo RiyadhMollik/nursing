@@ -1,0 +1,7 @@
+# AAP Nursing backend — Python deps
+# Install:  python -m venv .venv && .venv\Scripts\pip install -r backend/requirements.txt
+Django==5.1.15
+djangorestframework==3.17.2
+django-cors-headers==4.9.0
+mysqlclient==2.2.8
+python-dotenv==1.2.3

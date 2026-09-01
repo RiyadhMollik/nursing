@@ -29,40 +29,31 @@ function todayFullBn() {
 
 /* ============ Hooks ============ */
 function useReveal() {
+  const ioRef = useRef(null);
+  // Runs after every render so nodes mounted later (routine rows, course cards)
+  // get picked up. The observer is created once and never torn down mid-flight —
+  // disconnecting on each render killed the callback before it could fire.
   useEffect(() => {
-    const els = document.querySelectorAll(".reveal");
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("in");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.12 }
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    if (typeof IntersectionObserver === "undefined") {
+      document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+      return;
+    }
+    if (!ioRef.current) {
+      ioRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add("in");
+              ioRef.current.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.12 }
+      );
+    }
+    document.querySelectorAll(".reveal:not(.in)").forEach((el) => ioRef.current.observe(el));
   });
-}
-
-function useCountUp(target, duration = 1000, start = false) {
-  const [val, setVal] = useState(0);
-  useEffect(() => {
-    if (!start) return;
-    let raf;
-    const t0 = performance.now();
-    const tick = (now) => {
-      const p = Math.min(1, (now - t0) / duration);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setVal(Math.round(target * eased));
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, duration, start]);
-  return val;
+  useEffect(() => () => ioRef.current?.disconnect(), []);
 }
 
 /* ============ Toast system ============ */
@@ -104,10 +95,9 @@ export default function Home() {
   const [filters, setFilters] = useState({ phases: [], subjects: [] });
   const [phaseFilter, setPhaseFilter] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("");
+  const [programFilter, setProgramFilter] = useState("bsc");
   const [showRegister, setShowRegister] = useState(false);
-  const [showResource, setShowResource] = useState(null);
   const [navScrolled, setNavScrolled] = useState(false);
-  const [dashReady, setDashReady] = useState(false);
   const tableRef = useRef(null);
   const { toasts, push } = useToasts();
 
@@ -128,15 +118,29 @@ export default function Home() {
   }, []);
 
   const loadRoutine = useCallback(async () => {
-    const res = await fetch(`${API}/routine/`);
-    const data = await res.json();
-    setRoutine(data);
+    try {
+      const res = await fetch(`${API}/routine/`);
+      if (!res.ok) throw new Error("routine fetch failed");
+      const data = await res.json();
+      // API returns a plain array, but a paginated/error payload would break .map()
+      setRoutine(Array.isArray(data) ? data : data?.results || data?.routines || []);
+    } catch {
+      setRoutine([]);
+    }
   }, []);
 
   const loadFilters = useCallback(async () => {
-    const res = await fetch(`${API}/routine/filters/`);
-    const data = await res.json();
-    setFilters(data);
+    try {
+      const res = await fetch(`${API}/routine/filters/`);
+      if (!res.ok) throw new Error("filters fetch failed");
+      const data = await res.json();
+      setFilters({
+        phases: Array.isArray(data?.phases) ? data.phases : [],
+        subjects: Array.isArray(data?.subjects) ? data.subjects : [],
+      });
+    } catch {
+      setFilters({ phases: [], subjects: [] });
+    }
   }, []);
 
   const loadStudent = useCallback(async (mobile) => {
@@ -149,8 +153,6 @@ export default function Home() {
       }
       const data = await res.json();
       setStudent(data);
-      setDashReady(false);
-      setTimeout(() => setDashReady(true), 80);
       localStorage.setItem("aap_mobile", mobile);
     } catch {}
   }, []);
@@ -207,9 +209,9 @@ export default function Home() {
     setStudent(null);
     push("লগআউট হয়েছে।", "info", 2000);
   };
-  const resetFilters = () => { setPhaseFilter(""); setSubjectFilter(""); };
+  const resetFilters = () => { setPhaseFilter(""); setSubjectFilter(""); setProgramFilter("bsc"); };
 
-  const routineWithProgress = routine.map((r) => {
+  const routineWithProgress = (Array.isArray(routine) ? routine : []).map((r) => {
     if (student) {
       const doneSet = new Set(student.completed_day_numbers || []);
       if (r.day_number === student.today_routine?.day_number) {
@@ -233,15 +235,18 @@ export default function Home() {
     <>
       <Nav student={student} onLogout={logout} onStart={startChallenge} scrolled={navScrolled} />
 
+      {/* ===== Top banner ===== */}
+      <div className="top-banner">
+        <img src="/header.png?v=2" alt="ঢাকা নার্সিং কলেজ" />
+      </div>
+
       {/* ===== Hero ===== */}
       <Hero meta={meta} totalDays={totalDays} phases={phases} onStart={startChallenge} onSeeRoutine={scrollToTable} student={student} />
 
-      {/* ===== Dashboard ===== */}
-      <section className="section" id="progress" style={{ paddingTop: student ? 64 : 0 }}>
+      {/* ===== Study cycle ===== */}
+      <section className="section" id="cycle" style={{ paddingTop: 40 }}>
         <div className="container">
-          <div className="dashboard reveal">
-            <Dashboard student={student} totalDays={totalDays} animate={dashReady} />
-          </div>
+          <StudyCycle totalDays={totalDays} />
         </div>
       </section>
 
@@ -249,8 +254,7 @@ export default function Home() {
       <section className="section" id="routine" ref={tableRef}>
         <div className="container">
           <div className="section-head reveal">
-            <h2>{BANGLA_DIGITS(totalDays)} দিনের পূর্ণাঙ্গ রুটিন</h2>
-            <p>কোন দিন কোন Course, Subject, Lecture ও Topic—সব এক জায়গায়।</p>
+            <h2 className="routine-title">পূর্ণাঙ্গ রুটিন</h2>
           </div>
           <div className="reveal reveal-delay-1">
             <RoutineTable
@@ -258,21 +262,21 @@ export default function Home() {
               filters={filters}
               phaseFilter={phaseFilter}
               subjectFilter={subjectFilter}
+              programFilter={programFilter}
               setPhaseFilter={setPhaseFilter}
               setSubjectFilter={setSubjectFilter}
+              setProgramFilter={setProgramFilter}
               onReset={resetFilters}
               todayDay={student?.current_day}
               canTick={!!student}
               onTick={toggleProgress}
-              onOpenResource={setShowResource}
-              push={push}
             />
           </div>
         </div>
       </section>
 
       {/* ===== Course section ===== */}
-      <CourseSection push={push} />
+      <CourseSection />
 
       {/* ===== How it works ===== */}
       <section className="section">
@@ -283,9 +287,13 @@ export default function Home() {
           </div>
           <div className="steps">
             {[
-              { num: "STEP 01", title: "চ্যালেঞ্জ শুরু করুন", desc: "নাম ও মোবাইল নম্বর দিয়ে Join করুন।" },
-              { num: "STEP 02", title: "Day-1 থেকে শুরু", desc: "আপনি যেদিন Join করবেন, সেদিনই আপনার Day-1।" },
-              { num: "STEP 03", title: "Daily Target", desc: "ক্লাস → পরীক্ষা → প্রশ্ন ব্যাংক → বই—আজকের কাজ সম্পন্ন করুন।" },
+              student
+                ? { num: "STEP 01", title: "আপনি যুক্ত হয়েছেন ✓", desc: `স্বাগতম ${student.name}! এখন প্রতিদিন পড়াশুনা চালিয়ে যান।` }
+                : { num: "STEP 01", title: "চ্যালেঞ্জ শুরু করুন", desc: "নাম ও মোবাইল নম্বর দিয়ে Join করুন।" },
+              student
+                ? { num: "STEP 02", title: `আপনি এখন Day-${BANGLA_DIGITS(student.current_day || 1)}`, desc: "আপনার Join করার দিন থেকেই Day-1 গণনা শুরু হয়েছে।" }
+                : { num: "STEP 02", title: "Day-1 থেকে শুরু", desc: "আপনি যেদিন Join করবেন, সেদিনই আপনার Day-1।" },
+              { num: "STEP 03", title: "Daily Target", desc: "রুটিন অনুযায়ী প্রতিদিনের লেকচার ও টপিক সম্পন্ন করুন।" },
               { num: "STEP 04", title: `Day-${BANGLA_DIGITS(totalDays)}`, desc: "ধারাবাহিকভাবে Roadmap অনুসরণ করে Challenge শেষ করুন।" },
             ].map((s, i) => (
               <div className={`step reveal reveal-delay-${i + 1}`} key={i}>
@@ -303,9 +311,15 @@ export default function Home() {
         <div className="container">
           <div className="cta-box reveal">
             <h2>নার্স হওয়ার স্বপ্ন শুধু স্বপ্ন নয়—এটা একটি লক্ষ্য।</h2>
-            <p>আজ শুরু করুন। প্রতিদিনের একটি Target সম্পন্ন করুন। একদিন একদিন করে এগিয়ে যান আপনার Nursing Admission Goal-এর দিকে।</p>
+            <p>
+              {student
+                ? "আপনি ইতিমধ্যেই যাত্রা শুরু করেছেন। প্রতিদিনের একটি Target সম্পন্ন করুন। একদিন একদিন করে এগিয়ে যান আপনার Nursing Admission Goal-এর দিকে।"
+                : "আজ শুরু করুন। প্রতিদিনের একটি Target সম্পন্ন করুন। একদিন একদিন করে এগিয়ে যান আপনার Nursing Admission Goal-এর দিকে।"}
+            </p>
             <button className="btn btn-white" onClick={startChallenge}>
-              🔥 আজ থেকেই Day-1 শুরু করুন
+              {student
+                ? `📖 আজকের পড়াশুনা শুরু করুন (Day-${BANGLA_DIGITS(student.current_day || 1)})`
+                : "🔥 আজ থেকেই Day-1 শুরু করুন"}
             </button>
           </div>
         </div>
@@ -323,8 +337,6 @@ export default function Home() {
       )}
 
       {showRegister && <RegisterModal onClose={() => setShowRegister(false)} onRegister={handleRegister} />}
-      {showResource && <ResourceModal resource={showResource} onClose={() => setShowResource(null)} />}
-
       <ToastStack toasts={toasts} />
     </>
   );
@@ -336,12 +348,10 @@ function Nav({ student, onLogout, onStart, scrolled }) {
   return (
     <header className={`nav ${scrolled ? "scrolled" : ""}`}>
       <div className="container nav-inner">
-        <a className="brand" href="#"><span className="brand-badge">ন</span> <span className="brand-text">Nursing Challenge</span></a>
+        <a className="brand" href="#"><span className="brand-badge">ন</span> <span className="brand-text">নার্সিং পাঠশালা</span></a>
         <nav className={`navlinks ${menuOpen ? "open" : ""}`}>
-          <a href="#challenge" onClick={() => setMenuOpen(false)}>চ্যালেঞ্জ</a>
           <a href="#routine" onClick={() => setMenuOpen(false)}>রুটিন</a>
           <a href="/dashboard" onClick={() => setMenuOpen(false)}>ড্যাশবোর্ড</a>
-          <a href="/admin" onClick={() => setMenuOpen(false)}>Admin</a>
         </nav>
         <div className="nav-right">
           {student ? (
@@ -352,7 +362,7 @@ function Nav({ student, onLogout, onStart, scrolled }) {
               <button className="dash-logout" style={{ padding: "6px 10px", fontSize: 12 }} onClick={onLogout}>লগআউট</button>
             </div>
           ) : (
-            <button className="btn btn-primary btn-sm" onClick={onStart}>🚀 শুরু</button>
+            <button className="btn btn-primary btn-sm" onClick={onStart}>🚀 শুরু করি</button>
           )}
           <button className={`nav-burger ${menuOpen ? "active" : ""}`} onClick={() => setMenuOpen(!menuOpen)} aria-label="মেনু">
             <span></span><span></span><span></span>
@@ -387,11 +397,15 @@ function Hero({ meta, totalDays, phases, onStart, onSeeRoutine, student }) {
       <div className="hero-blob b2" />
       <div className="hero-blob b3" />
       <div className="container hero-grid">
-        <div>
-          <span className="kicker">🔥 {BANGLA_DIGITS(totalDays)} DAYS • DAILY ACTION PLAN</span>
-          <h1>{BANGLA_DIGITS(totalDays)} দিনে <br /><span className="grad">নার্স স্বপ্ন পূরণের</span> চ্যালেঞ্জ</h1>
+        <div className="hero-copy">
+          <h1>
+            <span className="hero-line1">১৫০ দিনের চ্যালেন্জ</span>
+            <span className="hero-line2 grad">নার্স স্বপ্ন পূরন</span>
+          </h1>
           <div className="hero-actions">
-            <button className="btn btn-primary" onClick={onStart}>🚀 চ্যালেঞ্জ শুরু করি</button>
+            <button className="btn btn-primary" onClick={onStart}>
+              {student ? "📖 পড়াশুনা শুরু করি" : "🚀 চ্যালেঞ্জ শুরু করি"}
+            </button>
             <button className="btn btn-soft" onClick={onSeeRoutine}>📋 {BANGLA_DIGITS(totalDays)} দিনের রুটিন দেখুন</button>
           </div>
         </div>
@@ -418,13 +432,15 @@ function Hero({ meta, totalDays, phases, onStart, onSeeRoutine, student }) {
                   <div className="hero-tl-content">
                     <div className="hero-tl-row">
                       <span className="hero-tl-label">{s.label}</span>
-                      <span className={`hero-tl-status ${isDone ? "st-done" : isActive ? "st-active" : "st-pending"}`}>
-                        {isDone ? "সম্পন্ন" : isActive ? "চলমান" : "অপেক্ষমাণ"}
-                      </span>
+                      {(isDone || isActive) && (
+                        <span className={`hero-tl-status ${isDone ? "st-done" : "st-active"}`}>
+                          {isDone ? "সম্পন্ন" : "চলমান"}
+                        </span>
+                      )}
                     </div>
                     <div className="hero-tl-meta">
                       <span>📅 {BANGLA_DIGITS(s.days)} দিন</span>
-                      <span>Day {BANGLA_DIGITS(s.start)}–{BANGLA_DIGITS(s.end)}</span>
+                      <span>(Day {BANGLA_DIGITS(s.start)}–{BANGLA_DIGITS(s.end)})</span>
                     </div>
                     <div className="hero-tl-bar">
                       <span style={{ width: `${phasePct}%`, background: `linear-gradient(90deg, ${s.color}, ${s.color}cc)` }} />
@@ -437,7 +453,7 @@ function Hero({ meta, totalDays, phases, onStart, onSeeRoutine, student }) {
           {!student && (
             <div className="hero-tl-cta">
               <span>শুরু করুন আজ থেকে</span>
-              <button className="btn btn-primary btn-sm" onClick={onStart}>🚀 যোগ দিন</button>
+              <button className="btn btn-primary btn-sm" onClick={onStart}>🚀 শুরু করি</button>
             </div>
           )}
         </div>
@@ -446,38 +462,39 @@ function Hero({ meta, totalDays, phases, onStart, onSeeRoutine, student }) {
   );
 }
 
-/* ============ Dashboard (dark) ============ */
-function Dashboard({ student, totalDays, animate }) {
-  const currentDay = student?.current_day || 1;
-  const completed = student?.completed_days || 0;
-  const remaining = student?.remaining_days || totalDays - 1;
-  const pct = Math.round((currentDay / totalDays) * 100);
+/* ============ Study cycle ============ */
+const CYCLE_STEPS = [
+  { key: "class",    ic: "▶️", time: "বিকালে", title: "লাইভ ক্লাস", cls: "cy-green" },
+  { key: "exam",     ic: "🌙", time: "রাত", title: "লাইভ পরীক্ষা", cls: "cy-amber" },
+  { key: "book",     ic: "📝", time: "দুপুরে", title: "বই পড়া", cls: "cy-red" },
+  { key: "practice", ic: "☀️", time: "সকাল", title: "প্র্যাক্টিস করা", cls: "cy-purple" },
+];
 
-  const completedCount = useCountUp(completed, 1000, animate);
-  const pctCount = useCountUp(pct, 1200, animate);
-  const remainingCount = useCountUp(remaining, 1000, animate);
-
+/* 2x2 loop with the center badge on every screen size; mobile just scales the
+   cards, gaps and badge down (see .cycle-* in globals.css). */
+function StudyCycle({ totalDays }) {
   return (
-    <>
-      <div className="dash-top">
-        <div className="dash-title">
-          <small>{student ? `স্বাগতম, ${student.name} 👋` : `আপনার ${BANGLA_DIGITS(totalDays)} দিনের Challenge`}</small>
-          <h2>Day {String(currentDay).padStart(2, "0")}</h2>
+    <div className="cycle reveal">
+      <div className="cycle-head">
+        <h3>📊 প্রতিদিনের পড়াশোনা</h3>
+        <span className="cycle-pill">একই নিয়মে চলবে</span>
+      </div>
+      <div className="cycle-grid">
+        {CYCLE_STEPS.map((s) => (
+          <div className={`cy-card ${s.cls}`} key={s.key}>
+            <span className="cy-ic">{s.ic}</span>
+            <div className="cy-body">
+              <span className="cy-time">{s.time}</span>
+              <b>{s.title}</b>
+            </div>
+          </div>
+        ))}
+        <div className="cycle-core">
+          <b>নিয়মিত<br />পড়াশোনা</b>
+          <span>{BANGLA_DIGITS(totalDays)} দিন চলবে</span>
         </div>
-        <span className="kicker" style={{ background: "rgba(255,255,255,0.1)", color: "#fff", border: "1px solid rgba(255,255,255,0.15)" }}>
-          {student ? (remaining > 0 ? `🔥 আরও ${BANGLA_DIGITS(remaining)} দিন` : "🏆 Challenge Complete") : "🚀 শুরু করুন"}
-        </span>
       </div>
-      <div className="dash-progress">
-        <span style={{ width: animate ? `${pct}%` : "0%" }} />
-      </div>
-      <div className="dash-metrics">
-        <div className="dmetric"><span className="dm-ic">📅</span><div className="dm-text"><b>{BANGLA_DIGITS(currentDay)}</b><span>বর্তমান দিন</span></div></div>
-        <div className="dmetric"><span className="dm-ic">✅</span><div className="dm-text"><b>{BANGLA_DIGITS(completedCount)}</b><span>সম্পন্ন দিন</span></div></div>
-        <div className="dmetric"><span className="dm-ic">⏰</span><div className="dm-text"><b>{BANGLA_DIGITS(remainingCount)}</b><span>বাকি দিন</span></div></div>
-        <div className="dmetric"><span className="dm-ic">📊</span><div className="dm-text"><b>{BANGLA_DIGITS(pctCount)}%</b><span>মোট প্রগ্রেস</span></div></div>
-      </div>
-    </>
+    </div>
   );
 }
 
@@ -537,11 +554,10 @@ function RoadmapChart({ totalDays, currentDay, phases }) {
 }
 
 /* ============ Routine table ============ */
-function RoutineTable({ rows, filters, phaseFilter, subjectFilter, setPhaseFilter, setSubjectFilter, onReset, todayDay, canTick, onTick, onOpenResource, push }) {
+function RoutineTable({ rows, filters, phaseFilter, subjectFilter, programFilter, setPhaseFilter, setSubjectFilter, setProgramFilter, onReset, todayDay, canTick, onTick }) {
   return (
     <div className="table-card">
       <div className="filters">
-        <h3>পূর্ণাঙ্গ রুটিন</h3>
         <select className="select" value={phaseFilter} onChange={(e) => setPhaseFilter(e.target.value)}>
           <option value="">সব Course</option>
           {filters.phases.map((p) => <option key={p} value={p}>{p}</option>)}
@@ -550,14 +566,17 @@ function RoutineTable({ rows, filters, phaseFilter, subjectFilter, setPhaseFilte
           <option value="">সব Subject</option>
           {filters.subjects.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
+        <select className="select" value={programFilter} onChange={(e) => setProgramFilter(e.target.value)} aria-label="Program">
+          <option value="bsc">BSc in Nursing</option>
+          <option value="diploma">Diploma in Nursing</option>
+        </select>
         <button className="btn btn-soft btn-sm" onClick={onReset}>↺ Reset</button>
-        <span style={{ fontSize: 12, color: "var(--muted)", fontWeight: 700 }}>{BANGLA_DIGITS(rows.length)} দিন</span>
       </div>
       <div className="table-scroll">
         <table className="routine">
           <thead>
             <tr>
-              <th>Day</th><th>Lecture</th><th>Topic</th><th>রিসোর্স</th>
+              <th>Day</th><th>Lecture</th><th>{programFilter === "bsc" ? "BSc Topic" : "Diploma Topic"}</th>
               {canTick && <th>স্ট্যাটাস</th>}
             </tr>
           </thead>
@@ -568,16 +587,8 @@ function RoutineTable({ rows, filters, phaseFilter, subjectFilter, setPhaseFilte
                   Day-{BANGLA_DIGITS(r.day_number)}
                   {r.day_number === todayDay && <span style={{ fontSize: 10, color: "var(--green)" }}> ● আজ</span>}
                 </td>
-                <td>{r.lecture || "—"}</td>
-                <td className="topic-cell">{r.bsc_topic || "—"}</td>
-                <td>
-                  {r.live_class_link && <a className="link-btn" href={r.live_class_link} target="_blank" rel="noreferrer">ক্লাস</a>}
-                  {r.exam_link && <a className="link-btn" href={r.exam_link} target="_blank" rel="noreferrer">পরীক্ষা</a>}
-                  {r.book_link && <a className="link-btn" href={r.book_link} target="_blank" rel="noreferrer">বই</a>}
-                  {!r.live_class_link && !r.exam_link && !r.book_link && !r.question_bank_link && (
-                    <button className="row-btn" onClick={() => push("এই দিনের রিসোর্স লিংক এখনও যুক্ত নেই।", "warn")}>View</button>
-                  )}
-                </td>
+                <td>{(programFilter === "bsc" ? r.bsc_lecture : r.diploma_lecture) || r.lecture || "—"}</td>
+                <td className="topic-cell">{(programFilter === "bsc" ? r.bsc_topic : r.diploma_topic) || "—"}</td>
                 {canTick && (
                   <td>
                     <button className={`tick-btn ${r._completed ? "done" : ""}`} onClick={() => onTick(r.day_number, r._completed)}>
@@ -595,7 +606,7 @@ function RoutineTable({ rows, filters, phaseFilter, subjectFilter, setPhaseFilte
 }
 
 /* ============ Course Section ============ */
-function CourseSection({ push }) {
+function LegacyCourseSection({ push }) {
   const COURSE_URL = "https://aapnursing.com/course/fighter2/promo";
   const ENROLL_URL = "https://wa.me/+8801403975955?text=" + encodeURIComponent("আমি কোর্সে ভর্তি হতে চাই");
   const COVER_IMG = "https://aapathshala.b-cdn.net/Fighter/Cover.jpg";
@@ -750,6 +761,21 @@ function CourseSection({ push }) {
   );
 }
 
+function CourseSection() {
+  return (
+    <section className="course-embed-section" id="course">
+      <iframe
+        className="course-embed"
+        src="https://aapnursing.com/course/fighter2/promo"
+        title="নার্সিং ফুল কোর্স"
+        loading="lazy"
+        scrolling="no"
+        allowFullScreen
+      />
+    </section>
+  );
+}
+
 /* ============ Footer ============ */
 function Footer({ onToast, totalDays }) {
   const [email, setEmail] = useState("");
@@ -772,15 +798,6 @@ function Footer({ onToast, totalDays }) {
         { label: "প্রগ্রেস ট্র্যাকার", href: "#progress" },
       ],
     },
-    {
-      title: "রিসোর্স",
-      links: [
-        { label: "লাইভ ক্লাস", href: "#routine" },
-        { label: "প্রশ্ন ব্যাংক", href: "#routine" },
-        { label: "পরীক্ষা", href: "#routine" },
-        { label: "বই", href: "#routine" },
-      ],
-    },
   ];
 
   return (
@@ -790,12 +807,11 @@ function Footer({ onToast, totalDays }) {
           {/* Brand + social */}
           <div className="footer-brand">
             <div className="brand">
-              <span className="brand-badge">ন</span> AAP Nursing
+              <span className="brand-badge">ন</span> নার্সিং পাঠশালা
             </div>
             <p>
               {BANGLA_DIGITS(totalDays)} দিনের স্ট্রাকচার্ড চ্যালেঞ্জের মাধ্যমে
-              নার্সিং ভর্তি পরীক্ষার প্রস্তুতি। প্রতিদিনের রুটিন, লাইভ ক্লাস,
-              পরীক্ষা ও প্রশ্ন ব্যাংক—সব এক প্ল্যাটফর্মে।
+              নার্সিং ভর্তি পরীক্ষার প্রস্তুতি। প্রতিদিনের পূর্ণাঙ্গ লেকচার ও টপিকভিত্তিক রুটিন এক প্ল্যাটফর্মে।
             </p>
             <div className="footer-social">
               <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">f</a>
@@ -845,7 +861,7 @@ function Footer({ onToast, totalDays }) {
 
         {/* Bottom bar */}
         <div className="footer-bottom">
-          <span>© {year} AAP Nursing • {BANGLA_DIGITS(totalDays)}-Day Challenge</span>
+          <span>© {year} নার্সিং পাঠশালা • {BANGLA_DIGITS(totalDays)}-Day Challenge</span>
           <span className="made">
             Made with <span className="heart">❤</span> in Bangladesh
           </span>
@@ -879,41 +895,16 @@ function RegisterModal({ onClose, onRegister }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose} aria-label="বন্ধ করুন">✕</button>
-        <h2>আপনার {BANGLA_DIGITS(150)} দিনের Challenge শুরু করুন</h2>
+        <h2>Challenge শুরু করি</h2>
         <p className="sub">আপনি যেদিন Registration করবেন, সেই দিন থেকেই আপনার Day-1 গণনা শুরু হবে।</p>
         <form onSubmit={submit}>
           <div className="form-group"><label>আপনার নাম</label><input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="আপনার নাম লিখুন" autoFocus required /></div>
           <div className="form-group"><label>মোবাইল নাম্বার</label><input className="input" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="01XXXXXXXXX" inputMode="tel" required /></div>
           {error && <div className="error-msg">{error}</div>}
           <div className="modal-actions">
-            <button type="button" className="btn btn-soft" onClick={onClose}>পরে</button>
-            <button type="submit" className="btn btn-primary" disabled={busy}>{busy ? <span className="spinner" /> : "🚀 আমার Challenge শুরু করি"}</button>
+            <button type="submit" className="btn btn-primary modal-submit-full" disabled={busy}>{busy ? <span className="spinner" /> : "🚀 আমার Challenge শুরু করি"}</button>
           </div>
         </form>
-      </div>
-    </div>
-  );
-}
-
-/* ============ Resource modal ============ */
-function ResourceModal({ resource, onClose }) {
-  if (!resource) return null;
-  const labels = { class: "লাইভ ক্লাস", question: "প্রশ্নব্যাংক", exam: "পরীক্ষা", book: "বই" };
-  const linkMap = { class: "live_class_link", question: "question_bank_link", exam: "exam_link", book: "book_link" };
-  const link = resource.data?.[linkMap[resource.type]];
-  const t = resource.data;
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} aria-label="বন্ধ করুন">✕</button>
-        <h2>{labels[resource.type]}</h2>
-        <p className="sub">Day-{BANGLA_DIGITS(t.day_number)} · {t.subject} · {t.lecture}</p>
-        <div className="success-note">টপিক: {t.bsc_topic || t.diploma_topic || "—"}</div>
-        {link ? (
-          <a className="btn btn-primary" href={link} target="_blank" rel="noreferrer" style={{ width: "100%" }}>খুলুন →</a>
-        ) : (
-          <div className="error-msg">এই রিসোর্সের লিংক এখনও যুক্ত করা হয়নি।</div>
-        )}
       </div>
     </div>
   );

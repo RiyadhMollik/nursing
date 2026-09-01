@@ -8,7 +8,7 @@ from django.db import transaction
 
 from challenge.models import DayRoutine
 
-CSV_PATH = Path(__file__).resolve().parents[4] / "নার্সিং নতুন লেকচার প্ল্যান - Sheet18.csv"
+DATA_PATH = Path(__file__).resolve().parents[4] / "routine_data.tsv"
 
 
 class Command(BaseCommand):
@@ -23,12 +23,12 @@ class Command(BaseCommand):
             DayRoutine.objects.all().delete()
             self.stdout.write(self.style.WARNING("Cleared existing routine rows."))
 
-        if not CSV_PATH.exists():
-            self.stderr.write(self.style.ERROR(f"CSV not found: {CSV_PATH}"))
+        if not DATA_PATH.exists():
+            self.stderr.write(self.style.ERROR(f"Routine data not found: {DATA_PATH}"))
             return
 
-        with open(CSV_PATH, encoding="utf-8") as f:
-            rows = list(csv.reader(f))
+        with open(DATA_PATH, encoding="utf-8-sig", newline="") as f:
+            rows = list(csv.reader(f, delimiter="\t"))
 
         # locate header row
         header_idx = None
@@ -51,18 +51,24 @@ class Command(BaseCommand):
                 continue
             phase = (row[1] or "").strip()
             subject = (row[2] or "").strip()
-            lecture = (row[3] or "").strip()
-            bsc = (row[4] or "").strip() if len(row) > 4 else ""
-            diploma = (row[5] or "").strip() if len(row) > 5 else ""
+            bsc_lecture = (row[3] or "").strip()
+            bsc_topic = (row[4] or "").strip() if len(row) > 4 else ""
+            diploma_lecture = (row[5] or "").strip() if len(row) > 5 else ""
+            diploma_topic = (row[6] or "").strip() if len(row) > 6 else ""
+            motivation = (row[7] or "").strip().lstrip("\u200b") if len(row) > 7 else ""
 
             obj, was_created = DayRoutine.objects.update_or_create(
                 day_number=day_number,
                 defaults={
                     "phase": phase,
                     "subject": subject,
-                    "lecture": lecture,
-                    "bsc_topic": bsc,
-                    "diploma_topic": diploma,
+                    # Keep the legacy field populated for older clients.
+                    "lecture": bsc_lecture,
+                    "bsc_lecture": bsc_lecture,
+                    "bsc_topic": bsc_topic,
+                    "diploma_lecture": diploma_lecture,
+                    "diploma_topic": diploma_topic,
+                    "motivational_line": motivation,
                 },
             )
             if was_created:

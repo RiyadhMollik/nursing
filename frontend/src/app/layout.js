@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "১৫০ দিনের চ্যালেঞ্জ | নার্স স্বপ্ন পূরণ",
+  title: "নার্সিং পাঠশালা | ১৫০ দিনের চ্যালেঞ্জ",
   description:
     "১৫০ দিনের Nursing Admission Challenge — প্রতিদিনের ক্লাস, পরীক্ষা, প্রশ্ন ব্যাংক ও বই এক জায়গায়।",
 };

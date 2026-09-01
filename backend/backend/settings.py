@@ -1,9 +1,23 @@
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-aap-nursing-155-day-challenge-dev-key-change-me"
-DEBUG = True
+# .env lives next to manage.py (backend/.env). override=True so the file wins over
+# any same-named variable already in the shell -- HOST in particular is a common one.
+load_dotenv(BASE_DIR / ".env", override=True)
+
+
+def _bool(name, default):
+    return os.environ.get(name, str(default)).strip().lower() in ("1", "true", "yes", "on")
+
+
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY", "django-insecure-aap-nursing-155-day-challenge-dev-key-change-me"
+)
+DEBUG = _bool("DEBUG", True)
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
@@ -48,14 +62,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "backend.wsgi.application"
 
+# NOTE: PASSWORD/HOST are intentionally unprefixed to match the .env this project
+# is deployed with. os.environ.get (not a truthiness check) so an explicitly empty
+# PASSWORD= means "no password" rather than falling back to the default.
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "aap_nursing",
-        "USER": "aap",
-        "PASSWORD": "aap_pass_2024",
-        "HOST": "127.0.0.1",
-        "PORT": "3306",
+        "NAME": os.environ.get("DATABASE_NAME", "aap_nursing"),
+        "USER": os.environ.get("DATABASE_USER", "aap"),
+        "PASSWORD": os.environ.get("PASSWORD", "aap_pass_2024"),
+        "HOST": os.environ.get("HOST", "127.0.0.1"),
+        "PORT": os.environ.get("PORT", "3306"),
         "OPTIONS": {"charset": "utf8mb4"},
     }
 }

@@ -11,6 +11,12 @@ const PHASES = [
 ];
 const WEEKDAYS = ["রবিবার", "সোমবার", "মঙ্গলবার", "বুধবার", "বৃহস্পতিবার", "শুক্রবার", "শনিবার"];
 const MONTHS_BN = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
+const RESOURCE_OPTIONS = [
+  { key: "live_class_link", icon: "🎥", title: "ক্লাস করি", subtitle: "আজকের Topic-এর ক্লাস", tone: "green" },
+  { key: "exam_link", icon: "📝", title: "পরীক্ষা দেই", subtitle: "আজকের পড়া যাচাই", tone: "red" },
+  { key: "question_bank_link", icon: "📚", title: "প্রশ্ন সলভ করি", subtitle: "Topic ভিত্তিক অনুশীলন", tone: "blue" },
+  { key: "book_link", icon: "📖", title: "বই পড়ি", subtitle: "আজকের Topic বই থেকে", tone: "purple" },
+];
 function todayFullBn() {
   const d = new Date();
   return `${BANGLA_DIGITS(d.getDate())} ${MONTHS_BN[d.getMonth()]}, ${BANGLA_DIGITS(d.getFullYear())}`;
@@ -22,7 +28,16 @@ export default function DashboardPage() {
   const [routine, setRoutine] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [routineTab, setRoutineTab] = useState("history");
+  const [resourceDay, setResourceDay] = useState(null);
+
+  useEffect(() => {
+    if (!resourceDay) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setResourceDay(null);
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [resourceDay]);
 
   // restore session
   useEffect(() => {
@@ -33,8 +48,10 @@ export default function DashboardPage() {
     }
   }, []);
 
-  const login = useCallback(async (m) => {
-    setLoading(true);
+  // `silent` re-fetches in the background so links added in the admin panel
+  // show up without the student having to log in again.
+  const login = useCallback(async (m, { silent = false } = {}) => {
+    if (!silent) setLoading(true);
     setError("");
     try {
       const res = await fetch(`${API}/student/?mobile=${encodeURIComponent(m)}`);
@@ -51,11 +68,28 @@ export default function DashboardPage() {
       const doneSet = new Set(data.completed_day_numbers || []);
       setRoutine(rows.map((r) => ({ ...r, _completed: doneSet.has(r.day_number) })));
     } catch (e) {
-      setError(e.message);
-      localStorage.removeItem("aap_mobile");
+      if (!silent) {
+        setError(e.message);
+        localStorage.removeItem("aap_mobile");
+      }
     }
-    setLoading(false);
+    if (!silent) setLoading(false);
   }, []);
+
+  // Pick up newly added resource links when the tab regains focus.
+  const activeMobile = student?.mobile;
+  useEffect(() => {
+    if (!activeMobile) return undefined;
+    const refresh = () => {
+      if (document.visibilityState === "visible") login(activeMobile, { silent: true });
+    };
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [activeMobile, login]);
 
   const logout = () => {
     localStorage.removeItem("aap_mobile");
@@ -145,16 +179,6 @@ export default function DashboardPage() {
     cells.push({ day: i, cls });
   }
 
-  // history (last 20 days around current)
-  const historyDays = [];
-  for (let i = Math.max(1, cd - 10); i <= Math.min(total, cd + 10); i++) {
-    const r = routine.find((x) => x.day_number === i);
-    let status = "pending";
-    if (i < cd) status = r?._completed ? "done" : "missed";
-    else if (i === cd) status = r?._completed ? "done" : "pending";
-    historyDays.push({ ...r, day_number: i, status, _completed: r?._completed });
-  }
-
   const today = student.today_routine;
 
   return (
@@ -162,7 +186,7 @@ export default function DashboardPage() {
       {/* Topbar */}
       <div className="dash-topbar">
         <div className="container dash-topbar-inner">
-          <a className="brand" href="/"><span className="brand-badge">ন</span> Nursing Challenge</a>
+          <a className="brand" href="/"><span className="brand-badge">ন</span> নার্সিং পাঠশালা</a>
           <div className="dash-user">
             <div className="avatar">{student.name.charAt(0)}</div>
             <div className="info">
@@ -202,35 +226,36 @@ export default function DashboardPage() {
         {/* Today + phase progress */}
         <div className="dash-row">
           <div className="dash-panel today-panel">
-            <h3>🔥 আজকের চ্যালেঞ্জ</h3>
-            <p className="today-sub">আপনি যেদিন Challenge শুরু করবেন, সেদিন থেকেই আপনার Day-1 গণনা শুরু হবে।</p>
+            <h3>🔥 আজকের পড়াশুনা</h3>
             {today ? (
               <div className="today">
                 <div className="today-main">
-                  <span className="day-pill">DAY {String(student.current_day).padStart(2, "0")}</span>
+                  <div className="today-card-head">
+                    <span className="day-pill">DAY {String(student.current_day).padStart(2, "0")}</span>
+                    <span className="today-card-date">{todayFullBn()} {WEEKDAYS[new Date().getDay()]}</span>
+                  </div>
                   <h3>{today.subject}</h3>
                   <div className="topic">{today.bsc_topic || today.diploma_topic || today.lecture || "—"}</div>
-                  <div className="meta">
-                    <span className="tag">{today.phase}</span>
-                    {today.lecture && today.lecture !== "সকল" && <span className="tag">{today.lecture}</span>}
-                    <span className="tag">{todayFullBn()}</span>
-                    <span className="tag">{WEEKDAYS[new Date().getDay()]}</span>
-                  </div>
                 </div>
                 <div className="today-side">
                   <div className="actions4">
-                    <a className={`action ${!today.live_class_link ? "is-disabled" : ""}`} href={today.live_class_link || "#"} target="_blank" rel="noreferrer" onClick={(e) => !today.live_class_link && e.preventDefault()}>
-                      <div className="emoji">🎥</div><b>ক্লাস করি</b><span>আজকের Topic-এর ক্লাস</span>
-                    </a>
-                    <a className={`action ${!today.exam_link ? "is-disabled" : ""}`} href={today.exam_link || "#"} target="_blank" rel="noreferrer" onClick={(e) => !today.exam_link && e.preventDefault()}>
-                      <div className="emoji">📝</div><b>পরীক্ষা দেই</b><span>আজকের পড়া যাচাই</span>
-                    </a>
-                    <a className={`action ${!today.question_bank_link ? "is-disabled" : ""}`} href={today.question_bank_link || "#"} target="_blank" rel="noreferrer" onClick={(e) => !today.question_bank_link && e.preventDefault()}>
-                      <div className="emoji">📚</div><b>প্রশ্ন সলভ করি</b><span>Topic ভিত্তিক অনুশীলন</span>
-                    </a>
-                    <a className={`action ${!today.book_link ? "is-disabled" : ""}`} href={today.book_link || "#"} target="_blank" rel="noreferrer" onClick={(e) => !today.book_link && e.preventDefault()}>
-                      <div className="emoji">📖</div><b>বই পড়ি</b><span>আজকের Topic বই থেকে</span>
-                    </a>
+                    {RESOURCE_OPTIONS.map((item) => {
+                      const link = today[item.key];
+                      return (
+                        <a
+                          key={item.key}
+                          className={`action ${!link ? "is-disabled" : ""}`}
+                          href={link || "#"}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => !link && e.preventDefault()}
+                        >
+                          <div className="emoji">{item.icon}</div>
+                          <b>{item.title}</b>
+                          <span>{link ? item.subtitle : "লিংক এখনো যোগ হয়নি"}</span>
+                        </a>
+                      );
+                    })}
                   </div>
                   <button
                     className={`btn ${student.today_completed ? "btn-soft" : "btn-primary"}`}
@@ -265,10 +290,13 @@ export default function DashboardPage() {
 
         {/* Heatmap */}
         <div className="dash-panel" style={{ marginBottom: 24 }}>
-          <h3>🗓️ ১৫০ দিনের ক্যালেন্ডার</h3>
+          <h3>🗓️ ১৫০ দিনের পড়াশুনার ক্যালেন্ডার</h3>
           <div className="heatmap">
             {cells.map((c) => (
-              <div key={c.day} className={`heat-cell ${c.cls}`} title={`Day ${c.day}`} />
+              <div key={c.day} className={`heat-cell ${c.cls}`} title={`Day ${c.day}`}>
+                <strong>{BANGLA_DIGITS(c.day)}</strong>
+                <span>DAY</span>
+              </div>
             ))}
           </div>
           <div className="heat-legend">
@@ -279,48 +307,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Tabbed: History / Full Routine */}
+        {/* Full routine */}
         <div className="dash-panel">
-          <div className="dash-tabs">
-            <button className={`dash-tab ${routineTab === "history" ? "active" : ""}`} onClick={() => setRoutineTab("history")}>
-              📋 সাম্প্রতিক হিস্ট্রি
-            </button>
-            <button className={`dash-tab ${routineTab === "routine" ? "active" : ""}`} onClick={() => setRoutineTab("routine")}>
-              📅 পূর্ণাঙ্গ রুটিন
-            </button>
-          </div>
-
-          {routineTab === "history" ? (
-            <div style={{ overflowX: "auto" }}>
-              <table className="dash-table">
-                <thead>
-                  <tr><th>দিন</th><th>সাবজেক্ট</th><th>লেকচার</th><th>স্ট্যাটাস</th><th>অ্যাকশন</th></tr>
-                </thead>
-                <tbody>
-                  {historyDays.map((d) => (
-                    <tr key={d.day_number}>
-                      <td className="day-cell">Day-{BANGLA_DIGITS(d.day_number)}</td>
-                      <td>{d.subject || "—"}</td>
-                      <td>{d.lecture || "—"}</td>
-                      <td>
-                        {d.status === "done" && <span className="st-done">✓ সম্পন্ন</span>}
-                        {d.status === "missed" && <span className="st-missed">✗ মিস</span>}
-                        {d.status === "pending" && <span className="st-pending">○ বাকি</span>}
-                      </td>
-                      <td>
-                        <button
-                          className={`tick-btn ${d._completed ? "done" : ""}`}
-                          onClick={() => toggleDay(d.day_number, d._completed)}
-                        >
-                          {d._completed ? "✓" : "○"} টগল
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
+          <h3>📅 ১৫০ দিনের পূর্ণাঙ্গ রুটিন</h3>
             <div style={{ overflowX: "auto", maxHeight: 600 }}>
               <table className="dash-table">
                 <thead>
@@ -336,18 +325,21 @@ export default function DashboardPage() {
                       <td>{r.lecture || "—"}</td>
                       <td style={{ whiteSpace: "pre-line", maxWidth: 220, color: "var(--muted-2)", lineHeight: 1.5 }}>{r.bsc_topic || r.diploma_topic || "—"}</td>
                       <td>
-                        {r.live_class_link && <a className="link-btn" href={r.live_class_link} target="_blank" rel="noreferrer">ক্লাস</a>}
-                        {r.exam_link && <a className="link-btn" href={r.exam_link} target="_blank" rel="noreferrer">পরীক্ষা</a>}
-                        {r.book_link && <a className="link-btn" href={r.book_link} target="_blank" rel="noreferrer">বই</a>}
-                        {r.question_bank_link && <a className="link-btn" href={r.question_bank_link} target="_blank" rel="noreferrer">প্রশ্ন</a>}
-                        {!r.live_class_link && !r.exam_link && !r.book_link && !r.question_bank_link && <span style={{ color: "var(--muted)", fontSize: 12 }}>—</span>}
+                        <button className="resource-open-btn" type="button" onClick={() => setResourceDay(r)}>
+                          <span aria-hidden="true">🔗</span> রিসোর্স
+                        </button>
                       </td>
                       <td>
                         <button
-                          className={`tick-btn ${r._completed ? "done" : ""}`}
+                          className={`status-switch ${r._completed ? "is-on" : ""}`}
                           onClick={() => toggleDay(r.day_number, r._completed)}
+                          role="switch"
+                          aria-checked={r._completed}
+                          aria-label={r._completed ? "সম্পন্ন—বাকি হিসেবে চিহ্নিত করুন" : "সম্পন্ন হিসেবে চিহ্নিত করুন"}
+                          title={r._completed ? "সম্পন্ন" : "সম্পন্ন হিসেবে চিহ্নিত করুন"}
                         >
-                          {r._completed ? "✓ সম্পন্ন" : "○ বাকি"}
+                          <span className="status-switch-track" aria-hidden="true"><span /></span>
+                          {r._completed && <span>সম্পন্ন</span>}
                         </button>
                       </td>
                     </tr>
@@ -355,9 +347,36 @@ export default function DashboardPage() {
                 </tbody>
               </table>
             </div>
-          )}
         </div>
       </div>
+
+      {resourceDay && (
+        <div className="resource-modal-overlay" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && setResourceDay(null)}>
+          <section className="resource-modal" role="dialog" aria-modal="true" aria-labelledby="resource-modal-title">
+            <button className="resource-modal-close" type="button" onClick={() => setResourceDay(null)} aria-label="বন্ধ করুন">×</button>
+            <span className="resource-modal-kicker">DAY {String(resourceDay.day_number).padStart(2, "0")}</span>
+            <h2 id="resource-modal-title">আজকের রিসোর্স</h2>
+            <p>{resourceDay.subject || resourceDay.lecture || "পড়াশোনার প্রয়োজনীয় লিংক"}</p>
+            <div className="resource-grid">
+              {RESOURCE_OPTIONS.map((item) => {
+                const link = resourceDay[item.key];
+                const content = (
+                  <>
+                    <span className="resource-icon" aria-hidden="true">{item.icon}</span>
+                    <strong>{item.title}</strong>
+                    <small>{link ? item.subtitle : "লিংক এখনো যোগ হয়নি"}</small>
+                  </>
+                );
+                return link ? (
+                  <a key={item.key} className={`resource-card ${item.tone}`} href={link} target="_blank" rel="noreferrer">{content}</a>
+                ) : (
+                  <div key={item.key} className={`resource-card ${item.tone} is-unavailable`} aria-disabled="true">{content}</div>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,29 @@
+import re
+
 from rest_framework import serializers
 from .models import Student, DayRoutine, Progress
+
+
+ROUTINE_FIELDS = [
+    "id", "day_number", "phase", "subject", "lecture",
+    "bsc_lecture", "bsc_topic", "diploma_lecture", "diploma_topic",
+    "motivational_line",
+    "live_class_link", "question_bank_link", "exam_link", "book_link",
+]
+# The four resource links the dashboard renders as cards.
+LINK_FIELDS = ["live_class_link", "question_bank_link", "exam_link", "book_link"]
+_SCHEME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.\-]*://")
+
+
+def normalize_link(value):
+    """Links are pasted by hand in the admin panel, so stay permissive:
+    a bare `youtu.be/xyz` should still reach the dashboard as a real link."""
+    value = (value or "").strip()
+    if not value:
+        return ""
+    if not _SCHEME_RE.match(value):
+        value = "https://" + value
+    return value[:500]
 
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -26,14 +50,29 @@ class RegisterSerializer(serializers.Serializer):
         return student
 
 
+def _link_field():
+    """Plain CharField instead of URLField: a strict URL check here made the
+    admin panel silently reject links typed without an `https://` prefix."""
+    return serializers.CharField(
+        max_length=500, required=False, allow_blank=True, allow_null=True, default="",
+    )
+
+
 class DayRoutineSerializer(serializers.ModelSerializer):
+    live_class_link = _link_field()
+    question_bank_link = _link_field()
+    exam_link = _link_field()
+    book_link = _link_field()
+
     class Meta:
         model = DayRoutine
-        fields = [
-            "id", "day_number", "phase", "subject", "lecture",
-            "bsc_topic", "diploma_topic",
-            "live_class_link", "question_bank_link", "exam_link", "book_link",
-        ]
+        fields = ROUTINE_FIELDS
+
+    def validate(self, attrs):
+        for name in LINK_FIELDS:
+            if name in attrs:
+                attrs[name] = normalize_link(attrs[name])
+        return attrs
 
 
 class ProgressSerializer(serializers.ModelSerializer):
@@ -44,14 +83,9 @@ class ProgressSerializer(serializers.ModelSerializer):
         fields = ["id", "day_number", "completed", "updated_at"]
 
 
-class DayRoutineWriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DayRoutine
-        fields = [
-            "id", "day_number", "phase", "subject", "lecture",
-            "bsc_topic", "diploma_topic",
-            "live_class_link", "question_bank_link", "exam_link", "book_link",
-        ]
+class DayRoutineWriteSerializer(DayRoutineSerializer):
+    """Same shape as the read serializer; kept separate for the admin endpoints."""
+    pass
 
 
 class AdminStudentSerializer(serializers.ModelSerializer):
