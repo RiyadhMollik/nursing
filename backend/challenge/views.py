@@ -15,6 +15,7 @@ from .serializers import (
 )
 
 TOTAL_DAYS = 150
+FREE_SEATS = 1000
 PHASES = [
     {"key": "বেসিক টু এডভান্স", "label": "বেসিক টু এডভান্স", "days": 100, "color": "#008643"},
     {"key": "ফাইনাল রিভিশন", "label": "ফাইনাল রিভিশন", "days": 30, "color": "#01542b"},
@@ -66,6 +67,8 @@ class MetaView(APIView):
             "title": "১৫০ দিনে নার্স স্বপ্ন পূরণের চ্যালেঞ্জ",
             "total_days": TOTAL_DAYS,
             "phases": PHASES,
+            "free_seats": FREE_SEATS,
+            "students_joined": Student.objects.count(),
         })
 
 

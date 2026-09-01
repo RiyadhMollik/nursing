@@ -373,6 +373,38 @@ function Nav({ student, onLogout, onStart, scrolled }) {
   );
 }
 
+/* ============ Free seats counter ============ */
+function FreeSeatsCard({ joined, seats }) {
+  if (!seats) return null;
+  const taken = Math.min(joined || 0, seats);
+  const pct = Math.min(100, (taken / seats) * 100);
+  const R = 42;
+  const CIRC = 2 * Math.PI * R;
+  return (
+    <div className="free-seats">
+      <p className="free-seats-text">
+        <span className="fs-strong">{BANGLA_DIGITS(seats.toLocaleString("en-US"))} শিক্ষার্থীর</span>
+        <span>জন্য সম্পূর্ণ ফ্রি</span>
+      </p>
+      <div className="fs-ring">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <circle className="fs-track" cx="50" cy="50" r={R} />
+          <circle
+            className="fs-arc"
+            cx="50" cy="50" r={R}
+            strokeDasharray={CIRC}
+            strokeDashoffset={CIRC * (1 - pct / 100)}
+          />
+        </svg>
+        <div className="fs-ring-label">
+          <strong>{BANGLA_DIGITS(taken)}</strong>
+          <span>জন যুক্ত</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ============ Hero ============ */
 function Hero({ meta, totalDays, phases, onStart, onSeeRoutine, student }) {
   const ringPct = student ? Math.round((student.current_day / totalDays) * 100) : 0;
@@ -408,7 +440,8 @@ function Hero({ meta, totalDays, phases, onStart, onSeeRoutine, student }) {
             </button>
             <button className="btn btn-soft" onClick={onSeeRoutine}>📋 {BANGLA_DIGITS(totalDays)} দিনের রুটিন দেখুন</button>
           </div>
-          {!student && <p className="hero-actions-note">শুরু করুন আজ থেকে</p>}
+          <p className="hero-actions-note">শুরু করুন আজ থেকে</p>
+          <FreeSeatsCard joined={meta?.students_joined} seats={meta?.free_seats} />
         </div>
         <div className="hero-card hero-tl-card">
           <div className="hero-tl-head">
