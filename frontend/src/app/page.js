@@ -408,6 +408,7 @@ function Hero({ meta, totalDays, phases, onStart, onSeeRoutine, student }) {
             </button>
             <button className="btn btn-soft" onClick={onSeeRoutine}>📋 {BANGLA_DIGITS(totalDays)} দিনের রুটিন দেখুন</button>
           </div>
+          {!student && <p className="hero-actions-note">শুরু করুন আজ থেকে</p>}
         </div>
         <div className="hero-card hero-tl-card">
           <div className="hero-tl-head">
@@ -450,12 +451,6 @@ function Hero({ meta, totalDays, phases, onStart, onSeeRoutine, student }) {
               );
             })}
           </div>
-          {!student && (
-            <div className="hero-tl-cta">
-              <span>শুরু করুন আজ থেকে</span>
-              <button className="btn btn-primary btn-sm" onClick={onStart}>🚀 শুরু করি</button>
-            </div>
-          )}
         </div>
       </div>
     </section>
@@ -585,7 +580,7 @@ function RoutineTable({ rows, filters, phaseFilter, subjectFilter, programFilter
               <tr key={r.day_number} className={r.day_number === todayDay ? "current-row" : ""}>
                 <td className="day-cell">
                   Day-{BANGLA_DIGITS(r.day_number)}
-                  {r.day_number === todayDay && <span style={{ fontSize: 10, color: "var(--green)" }}> ● আজ</span>}
+                  {r.day_number === todayDay && <span className="today-tag">● আজ</span>}
                 </td>
                 <td>{(programFilter === "bsc" ? r.bsc_lecture : r.diploma_lecture) || r.lecture || "—"}</td>
                 <td className="topic-cell">{(programFilter === "bsc" ? r.bsc_topic : r.diploma_topic) || "—"}</td>
